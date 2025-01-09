@@ -40,7 +40,6 @@ export function ProfileEdit() {
     try {
       setIsResOk(false)
       const response = await axios.post(`/api/users/edit/${id}`, formData, { withCredentials: true });
-      console.log(response)
       const profilePic = response?.data?.user?.profilePicture
       dispatch(addUser({
         fullName: response?.data?.user?.fullName,
@@ -68,7 +67,7 @@ export function ProfileEdit() {
   return (
     (
       <>
-        <Sidebar />
+        {/* <Sidebar /> */}
         <div className="flex w-[81.8%] ml-auto">
           <div className="container mx-auto dark:bg-neutral-950 dark:text-white h-screen overflow-y-auto">
             <div className="flex flex-col md:flex-row gap-1">

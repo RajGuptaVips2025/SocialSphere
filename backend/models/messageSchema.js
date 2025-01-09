@@ -19,7 +19,6 @@ const messageSchema = mongoose.Schema({
   message: {
     type: String
   },
-  iv: { type: String }, 
   mediaUrl: {
     type: String
   },

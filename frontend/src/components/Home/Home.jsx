@@ -47,16 +47,6 @@ const Home = ({ socketRef }) => {
     setPage((prevPage) => prevPage + 1);
   };
 
-  useEffect(() => {
-    fetchPosts(page);
-  }, [page]);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLoading]);
-
-
   const handleLike = async (e, postId) => {
     e.preventDefault();
     const userId = userDetails.id;
@@ -64,7 +54,6 @@ const Home = ({ socketRef }) => {
     try {
       // API request to like the post
       const { data: updatedPost } = await axios.put(`/api/posts/${postId}/like`, { userId });
-
       // Update the post locally in the state
       setAllPosts((prevPosts) =>
         prevPosts.map((post) =>
@@ -76,6 +65,12 @@ const Home = ({ socketRef }) => {
       if (error.response?.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login');
     }
   };
+
+  const handleDeletePost = async (e, postId) => {
+    e.preventDefault()
+    const response = await axios.delete(`/api/posts/delete/${postId}`);
+    setAllPosts((prevPosts) => prevPosts.filter((post) => post?._id !== response?.data?.post?._id))
+  }
 
   const handleSavePosts = async (e, postId) => {
     e.preventDefault();
@@ -112,9 +107,10 @@ const Home = ({ socketRef }) => {
 
   const getFollowing = async () => {
     try {
-      const { data: { following } } = await axios.get(`/api/users/${userDetails.id}/following`);
-      // console.log(following)
-      setFollowingUserss(following)
+      const { data } = await axios.get(`/api/users/${userDetails.id}/following`);
+      // console.log(data)
+      const following = data?.user?.following
+      setFollowingUserss(data?.user?.following)
       dispatch(setFollowing([...following]));
     } catch (error) {
       console.error('Error fetching following users:', error);
@@ -131,10 +127,8 @@ const Home = ({ socketRef }) => {
       dispatch(setFollower(followers));
       setFollowingUserss(following);
     } catch (error) {
-      console.error('Error following/unfollowing the user:', error);
+      console.error('Error following/unfollowing the user:', error.message);
       if (error.response?.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login');
-    } finally {
-      // fetchPosts(); // Refresh posts
     }
   };
 
@@ -160,6 +154,16 @@ const Home = ({ socketRef }) => {
     }
   };
 
+
+  useEffect(() => {
+    fetchPosts(page);
+  }, [page]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading]);
+
   useEffect(() => {
     getFollowing();
     getSavePosts();
@@ -167,46 +171,52 @@ const Home = ({ socketRef }) => {
 
   useEffect(() => {
     socketRef.current.on('rtmNotification', (rtmNotification) => {
-      console.log('bsjja    ', rtmNotification);
-      dispatch(setRtmNotification(rtmNotification))
+      {
+        rtmNotification.id !== userDetails?.id &&
+        dispatch(setRtmNotification(rtmNotification))
+      }
     });
     return () => {
       socketRef.current.off('rtmNotification');
     };
-  }, [dispatch]); // Empty dependency array to ensure the listener is added only once
+  }, []); // Empty dependency array to ensure the listener is added only once
 
   return (<div className='dark:bg-neutral-950 dark:text-white'>
-
-    {/* { isLoading && <InstagramSkeletonComponent/> } */}
-
     <div className="flex bg-white dark:bg-neutral-950 min-h-screen">
-      <Sidebar />
+      {/* <Sidebar /> */}
       <PostComment selectedMedia={selectedMedia} isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
-      <main className="flex-1 ml-64 flex justify-center">
-        <div className="max-w-2xl w-full py-3 px-4">
-          <Stories />
-          {/* Posts */}
-          <section className="mt-2 mx-auto w-[100vw] sm:w-[80vw] md:w-[60vw] lg:w-[468px]">
-            {allPosts.map((post) => (
-              <Post
-                key={post._id}
-                post={post}
-                userDetails={userDetails}
-                savedPost={savedPosts}
-                followingUserss={followingUserss}
-                handleLike={handleLike}
-                handleSavePosts={handleSavePosts}
-                showComments={showComments}
-                handleFollowing={handleFollowing}
-                handleCommentSubmit={handleCommentSubmit}
-              />
-            ))}
-            
-            {isLoading && <InstagramSkeletonComponent />}
-            {!hasMore && <div>No more posts to load</div>}
-          </section>
+      {/* <main className="flex-1 ml-64 flex justify-center"> */}
+      <main className="flex-1 md:ml-[72px] lg:ml-60">
+        {/* <div className="max-w-2xl w-full py-3 px-4"> */}
+        <div className="max-w-screen-xl mt-14 md:mt-0 mx-auto py-2 md:px-6 lg:px-8">
+          <div className="flex gap-0">
+            <div className="flex-1 max-w-[630px]">
+              <Stories />
+              {/* Posts */}
+              <section className="mt-2 mx-auto sm:w-[80vw] md:w-[60vw] lg:w-[468px]">
+                {allPosts.map((post) => (
+                  <Post
+                    key={post._id}
+                    post={post}
+                    userDetails={userDetails}
+                    savedPost={savedPosts}
+                    followingUserss={followingUserss}
+                    handleLike={handleLike}
+                    handleSavePosts={handleSavePosts}
+                    showComments={showComments}
+                    handleFollowing={handleFollowing}
+                    handleCommentSubmit={handleCommentSubmit}
+                    handleDeletePost={handleDeletePost}
+                  />
+                ))}
+
+                {isLoading && <InstagramSkeletonComponent />}
+                {!hasMore && <div>No more posts to load</div>}
+              </section>
+            </div>
+            <SuggestedUsers />
+          </div>
         </div>
-        <SuggestedUsers />
       </main>
     </div>
   </div>

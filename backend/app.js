@@ -8,6 +8,7 @@ const postRoutes = require('./routes/postRoutes');
 const userRoutes = require('./routes/userRoutes'); // Updated userRoutes with reel history functionality
 const conversationRoutes = require('./routes/conversationRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const storyRoutes = require('./routes/storyRoutes');
 const errorHandler = require('./middlewares/errorMiddleware');
 const cors = require('cors');
 const { server, app } = require('./socket/socket');
@@ -35,6 +36,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes); // Now includes reel history functionality
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/story', storyRoutes);
 
 // Error handler
 app.use(errorHandler);

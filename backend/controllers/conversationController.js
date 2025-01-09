@@ -4,28 +4,18 @@ const User = require('../models/userSchema');
 const GroupChat = require('../models/groupChatSchema')
 const cloudinary = require('../config/cloudinary')
 const { getReciverSocketId, io } = require('../socket/socket');
-const { encrypt, decrypt } = require("../config/crypto");
-const crypto = require('crypto');
-const fs = require('fs');
-const util = require('util');
-const readFile = util.promisify(fs.readFile);
 
-
+// For individual message sending
 const sendMessage = async (req, res) => {
   try {
     const { textMessage: message, senderId, messageType } = req.body;
     const receiverId = req.params.id;
 
-    // Generate a random IV
-    let iv = crypto.randomBytes(16);
-
-    // Encrypt the message
-    const { iv: ivHex, encryptedData } = encrypt(message, iv);
-
+    // Handle file upload (if exists)
     let mediaUrl = '';
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "auto",
+        resource_type: "auto",  // Automatically detects image or video
       });
       mediaUrl = result.secure_url;
     }
@@ -43,8 +33,7 @@ const sendMessage = async (req, res) => {
     const newMessage = await Message.create({
       senderId,
       reciverId: receiverId,
-      message: messageType === 'text' ? encryptedData : undefined,
-      iv: messageType === 'text' ? ivHex : undefined,
+      message: messageType === 'text' ? message : undefined,
       mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
       messageType,
     });
@@ -52,11 +41,10 @@ const sendMessage = async (req, res) => {
     conversation.messages.push(newMessage._id);
     await conversation.save();
 
+    // Populate the new message with sender and receiver details
     const populatedMessage = await Message.findById(newMessage._id)
-      .populate('senderId', 'username profilePicture')
-      .populate('reciverId', 'username profilePicture');
-
-    populatedMessage.message = message;
+      .populate('senderId', 'username profilePicture') // Populate sender details
+      .populate('reciverId', 'username profilePicture'); // Populate receiver details
 
     const receiverSocketId = getReciverSocketId(receiverId);
     if (receiverSocketId) {
@@ -69,6 +57,7 @@ const sendMessage = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 // For getting friends of a user
 const getFriends = async (req, res) => {
@@ -101,27 +90,15 @@ const getAllMessages = async (req, res) => {
     }).populate({
       path: 'messages',
       populate: [
-        { path: 'senderId', select: 'username profilePicture' },
-        { path: 'reciverId', select: 'username profilePicture' }
+        { path: 'senderId', select: 'username profilePicture' }, // Populate sender details
+        { path: 'reciverId', select: 'username profilePicture' }  // Populate receiver details (if necessary)
       ]
     });
 
-    // console.log(conversation);
+    
     if (!conversation) {
       return res.status(201).json({ success: true, messages: [] });
     }
-
-    // Decrypt messages
-    conversation.messages = conversation.messages.map(msg => {
-      console.log(msg.messageType);
-      if (msg.messageType === 'text') {
-        msg.message = decrypt({
-          iv: msg.iv,
-          encryptedData: msg.message
-        });
-      }
-      return msg;
-    });
 
     return res.status(200).json({ success: true, messages: conversation.messages });
   } catch (error) {
@@ -144,6 +121,8 @@ const createGroupChat = async (req, res) => {
       members: allMembers,
       createdBy
     });
+
+
 
     allMembers.forEach(({ userId }) => {
       // Get the socket ID for this user
@@ -195,12 +174,6 @@ const sendGroupMessage = async (req, res) => {
     const { senderId, textMessage: message, messageType } = req.body;
     const groupId = req.params.groupId;
 
-    // Generate a random IV
-    let iv = crypto.randomBytes(16);
-
-    // Encrypt the message
-    const { iv: ivHex, encryptedData } = encrypt(message, iv);
-
     let mediaUrl = '';
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
@@ -216,17 +189,15 @@ const sendGroupMessage = async (req, res) => {
 
     const newMessage = {
       senderId,
-      message: messageType === 'text' ? encryptedData : undefined,
-      iv: messageType === 'text' ? ivHex : undefined,
+      message: messageType === 'text' ? message : undefined,
       mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
       messageType,
     };
 
     groupChat.messages.push(newMessage);
     groupChat.updatedAt = Date.now();
-    await groupChat.save();
 
-    newMessage.message = message;
+    await groupChat.save();
 
     // Emit the new message to all group members via socket.io
     const members = groupChat.members.map(member => member.userId.toString());
@@ -253,18 +224,6 @@ const getGroupMessages = async (req, res) => {
     if (!groupChat) {
       return res.status(404).json({ error: 'Group chat not found' });
     }
-
-    // Decrypt messages
-    groupChat.messages = groupChat.messages.map(msg => {
-      console.log(msg.messageType);
-      if (msg.messageType === 'text') {
-        msg.message = decrypt({
-          iv: msg.iv,
-          encryptedData: msg.message
-        });
-      }
-      return msg;
-    });
 
     res.status(200).json({ success: true, messages: groupChat.messages });
   } catch (error) {

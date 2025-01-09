@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { addUser } from '@/features/userDetail/userDetailsSlice';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -23,8 +25,11 @@ const Login = () => {
         id: response?.data?.user?._id,
         profilePic: profilePic
       }));
+      toast.success('Login Successfull');
       navigate(`/profile/${response?.data?.user?.username}`);
+
     } catch (err) {
+      toast.error('Something went wrong!!!');
       console.error('Login error:', err);
     }
   };

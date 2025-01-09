@@ -14,6 +14,9 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFollowingUsers, setMessages, setSuggestedUser } from '@/features/userDetail/userDetailsSlice';
 import ChatBox from "./ChatBox"
+import { SearchDialogWithCheckboxesComponent } from "./search-dialog-with-checkboxes"
+import { IoIosArrowDown } from "react-icons/io";
+
 
 export function ChatComponent({ socketRef }) {
   const links = [
@@ -32,6 +35,8 @@ export function ChatComponent({ socketRef }) {
   const suggestedUser = useSelector((state) => state.counter.suggestedUser);
   const dispatch = useDispatch()
   const navigate = useNavigate()
+
+
   const getFollowingUsers = async (username) => {
     try {
       const response = await axios.get(`/api/conversations/followingUsers/${username}`);
@@ -46,6 +51,8 @@ export function ChatComponent({ socketRef }) {
     }
   };
 
+
+
   const getRealTimeMessages = () => {
     socketRef.current.on('newMessage', (newMessage) => {
       Array.isArray(messages) ?
@@ -57,6 +64,8 @@ export function ChatComponent({ socketRef }) {
     });
     
   }
+
+
 
   useEffect(() => {
 
@@ -71,6 +80,7 @@ export function ChatComponent({ socketRef }) {
 
   useEffect(() => {
     if (userDetails?.username) {
+      dispatch(setSuggestedUser(null))
       getFollowingUsers(userDetails.username);
     }
     return () => {
@@ -86,15 +96,11 @@ export function ChatComponent({ socketRef }) {
     }
 
 
-    socketRef.current.on('videoCallOffer', async ({ from, offer }) => {
-      // console.log('Received videoCallOffer from:', offer.type);
-      // setCreateOffer(offer);
-      // setForm(from);
-      if (offer.type == 'offer') {
-        // setIsAnswer(true);
-        navigate(`/call/${from}`); // Navigate to the correct call route
-      }
-    });
+    // socketRef.current.on('videoCallOffer', async ({ from, offer }) => {
+    //   if (offer.type == 'offer') {
+    //     navigate(`/call/${from}`); // Navigate to the correct call route
+    //   }
+    // });
   }, [userDetails, suggestedUser]);
 
 
@@ -130,7 +136,7 @@ export function ChatComponent({ socketRef }) {
     (<div className="flex h-screen">
       <div className="flex-1 flex dark:bg-neutral-950 dark:text-white">
         {/* Sidebar */}
-        <div className="h-screen w-[5.3%] flex flex-col gap-7 items-center border-r-[.1px] border-zinc-800">
+        <div className="h-screen w-[5.3%] hidden md:flex flex-col gap-7 items-center border-r-[.1px] border-zinc-800">
           <div className="instaIcon my-8">
             <Link to="/">
               <FaInstagram size={26} />
@@ -143,23 +149,24 @@ export function ChatComponent({ socketRef }) {
           ))}
         </div>
         <div
-          className="w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white">
+          className={` ${suggestedUser?"w-0":'w-full'}  md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}>
           <div
             className="p-4 border-gray-200 dark:border-zinc-800 dark:bg-neutral-950 dark:text-white flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold dark:bg-neutral-950 dark:text-white">{userDetails.username}</span>
+              <span className="font-semibold flex items-center gap-2 cursor-pointer dark:bg-neutral-950 dark:text-white">{userDetails.username} <IoIosArrowDown/></span>
             </div>
             <div className="flex space-x-2">
-              <Button
+            <SearchDialogWithCheckboxesComponent socketRef={socketRef} />
+              {/* <Button
                 variant="ghost"
                 size="sm"
                 className="px-2 text-black dark:bg-neutral-950 dark:text-white">
                 <FaRegEdit size={20} />
-              </Button>
+              </Button> */}
             </div>
           </div>
           <div
-            className="flex justify-between items-center px-4 py-2  border-gray-200 dark:border-gray-700">
+            className="flex justify-between items-center px-4 py-2 border-gray-200 dark:border-gray-700">
             <span className="font-semibold text-black dark:bg-neutral-950 dark:text-white">Messages</span>
             <span className="text-black dark:bg-neutral-950 dark:text-white text-sm">Requests</span>
           </div>
