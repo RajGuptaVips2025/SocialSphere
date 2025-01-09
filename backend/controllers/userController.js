@@ -1,7 +1,8 @@
 const User = require('../models/userSchema');
 const Post = require('../models/postSchema');
+const Story = require('../models/storySchema');
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary
-const { getReciverSocketId } = require('../socket/socket');
+
 
 const getUserAndPosts = async (req, res) => {
   const page = parseInt(req.query.page) || 0; // Default page to 0 if not provided
@@ -29,11 +30,25 @@ const getUserAndPosts = async (req, res) => {
 const getFollowing = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
-    // console.log(user);
-    res.json(user);
+  
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+  
+    const followingUsers = [...user.following, user._id];
+    console.log(followingUsers);
+    // Fetch stories of all users in the following list
+    const stories = await Story.find({ user: { $in: followingUsers } })
+      .populate("user", "username profilePicture") // Populate the username and profile picture
+      .sort({ createdAt: -1 });
+  
+    res.json({ user, stories });
+  
   } catch (error) {
+    console.error("Error fetching user and stories:", error);
     res.status(500).json({ error: 'Server error' });
   }
+
 };
 
 
@@ -131,6 +146,7 @@ const getUserDashboard = async (req, res) => {
 
     // Find the user by username
     const user = await User.findOne({ username });
+    // console.log(user);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -147,6 +163,7 @@ const getUserDashboard = async (req, res) => {
 
     // Calculate total likes, comments, and views while storing IDs
     reels.forEach(reel => {
+      // console.log(reel)
       if (reel.likes.length > 0) {
         totalLikes.push(reel._id); // Store reel ID if it has likes
       }

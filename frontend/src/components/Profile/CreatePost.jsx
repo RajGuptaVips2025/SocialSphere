@@ -36,7 +36,6 @@ const CreatePost = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(response.data);
       navigate('/');
 
     } catch (error) {

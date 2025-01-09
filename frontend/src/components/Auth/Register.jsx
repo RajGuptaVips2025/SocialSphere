@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch } from 'react-redux';
 import { addUser } from '@/features/userDetail/userDetailsSlice';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const Register = () => {
@@ -27,10 +29,12 @@ const Register = () => {
                 profilePic: profilePic
             }));
             // navigate(`/profile/${username}`);
+            toast.success('Account Created Successfully');
             navigate(`/profile/${response?.data?.newUser?.username}`);
 
         } catch (err) {
             if (err.response.statusText === "Unauthorized") navigate('/login')
+            toast.error('Please check details');
             console.error(err);
         }
     };
@@ -81,7 +85,7 @@ const Register = () => {
                     <p className="text-center text-gray-600 mt-4">OR</p>
                     <form onSubmit={handleSubmit} className="mt-4">
                         <input
-                            type="text"
+                            type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-3 py-2 border rounded-sm text-[12px] outline-none bg-[#fafafa]"

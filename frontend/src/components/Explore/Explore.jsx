@@ -11,10 +11,10 @@ import { useNavigate } from 'react-router-dom';
 
 const ExploreGrid = () => {
     const [allPosts, setAllPosts] = useState([]);
-    const [open, setOpen] = useState(false);
     const dispatch = useDispatch()
     const navigate = useNavigate()
-
+    const [selectedMedia, setSelectedMedia] = useState(null); // To track selected media
+    const [isDialogOpen, setIsDialogOpen] = useState(false);  // To handle dialog state
 
     const fetchPosts = async () => {
         try {
@@ -28,11 +28,10 @@ const ExploreGrid = () => {
 
     const showComments = (e, post) => {
         e.preventDefault();
-
-        setOpen(true)
+        setSelectedMedia(post);
+        setIsDialogOpen(true);
         dispatch(setSelectedPost(post));
     };
-
 
     useEffect(() => {
         fetchPosts();
@@ -42,9 +41,9 @@ const ExploreGrid = () => {
     const renderMedia = (post) => {
         return (
             <>
-                {post?.mediaType === 'image' ? (
+                {post?.media[0]?.mediaType === 'image' ? (
                     <img
-                        src={post?.mediaPath}
+                        src={post?.media[0]?.mediaPath}
                         alt={post?.caption}
                         className="object-cover w-full h-full"
                     />
@@ -52,7 +51,7 @@ const ExploreGrid = () => {
                     <video
                         autoPlay
                         muted
-                        src={post?.mediaPath}
+                        src={post?.media[0]?.mediaPath}
                         loop
                         className="object-cover w-full h-full duration-300"
                     />
@@ -74,8 +73,8 @@ const ExploreGrid = () => {
 
     return (
         <>
-            <PostComment open={open} setOpen={setOpen} func={fetchPosts} />
-            <div className="w-[81.8%] dark:bg-neutral-950 min-h-screen grid grid-cols-3 gap-1 px-20 py-12 ml-auto">
+            <PostComment selectedMedia={selectedMedia} isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
+            <div className="flex-1 md:ml-[72px] lg:ml-60 dark:bg-neutral-950 min-h-screen grid grid-cols-3 gap-1 md:px-12 py-5 md:py-12 ml-auto">
                 {allPosts?.map((post, index) => {
                     if (index === 2) {
                         // The third item will span both rows
@@ -112,7 +111,7 @@ const ExploreGrid = () => {
 const Explore = () => {
     return (
         <>
-            <Sidebar />
+            {/* <Sidebar /> */}
             <ExploreGrid />
         </>
     );

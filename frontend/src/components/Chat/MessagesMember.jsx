@@ -11,7 +11,7 @@ function MessagesMember({ socketRef }) {
     const dispatch = useDispatch()
     return (
         <>
-            <SearchDialogWithCheckboxesComponent socketRef={socketRef} />
+            {/* <SearchDialogWithCheckboxesComponent socketRef={socketRef} /> */}
             <ScrollArea className="flex-grow">
                 {followingUsers?.length > 0 ? (
                     followingUsers.map((suggestedUser) => (
@@ -19,14 +19,14 @@ function MessagesMember({ socketRef }) {
                             key={suggestedUser._id}
                             className="flex items-center space-x-3 p-3 hover:bg-gray-100 dark:hover:bg-neutral-700 cursor-pointer">
                             <div className="relative">
-                                <Avatar className="bg-gray-200 dark:bg-neutral-950 dark:text-white">
-                                    <AvatarImage className="object-cover object-top" src={'groupName' in suggestedUser ? `http://localhost:5000/${suggestedUser?.groupImage}` : suggestedUser?.profilePicture} alt={`${suggestedUser?.username}'s profile`} />
+                                <Avatar className="bg-gray-200 w-14 h-14 md:w-12 md:h-12 dark:bg-neutral-950 dark:text-white">
+                                    <AvatarImage className="w-full h-full object-cover object-top" src={'groupName' in suggestedUser ? `http://localhost:5000/${suggestedUser?.groupImage}` : suggestedUser?.profilePicture} alt={`${suggestedUser?.username}'s profile`} />
                                     <AvatarFallback>{'groupName' in suggestedUser ? `${suggestedUser.groupName}` : `${suggestedUser.username}`}</AvatarFallback>
                                 </Avatar>
-                                {onlineUsers?.includes(suggestedUser?._id) && (<div className="w-3 h-3 absolute top-7 left-7 border-[2px] border-white bg-green-500 rounded-full"></div>)}
+                                {onlineUsers?.includes(suggestedUser?._id) && (<div className="w-3 h-3 absolute top-9 left-9 border-[2px] border-white bg-green-500 rounded-full"></div>)}
                             </div>
                             <div className="flex-grow">
-                                <div className="font-semibold text-sm text-black dark:text-white">{'groupName' in suggestedUser ? `${suggestedUser.groupName}` : `${suggestedUser.username}`}</div>
+                                <div className="text-sm md:text-sm text-black dark:text-white">{'groupName' in suggestedUser ? `${suggestedUser.groupName}` : `${suggestedUser.username}`}</div>
                                 <div className="text-xs dark:text-white flex justify-between">
                                     {onlineUsers?.includes(suggestedUser?._id) && (
                                         <p className="text-xs text-gray-400">Active now</p>
