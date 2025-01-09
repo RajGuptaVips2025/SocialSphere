@@ -10,7 +10,7 @@ import { Heart, MessageCircle, MoreHorizontal, Send, Volume2, VolumeX } from "lu
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 
-const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handleSavePosts, showComments, handleFollowing, handleCommentSubmit }) => {
+const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handleSavePosts, showComments, handleFollowing, handleCommentSubmit, handleDeletePost }) => {
   // console.log(post)
 
   const videoRef = useRef(null);
@@ -59,7 +59,7 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
   }, [videoRef]);
   return (
     <div className="space-y-8 mb-4">
-      <Card key={post._id} className="w-11/12 border-t-0 border-x-0 rounded-none border-b-[.1px] border-zinc-300 shadow-none">
+      <Card key={post._id} className="w-full border-t-0 border-x-0 rounded-none border-b-[.1px] border-zinc-300 shadow-none">
         <CardHeader className="flex flex-row items-center space-x-4 px-0 py-4">
           <Link to={`/profile/${post?.author?.username}`}>
             <Avatar>
@@ -91,6 +91,12 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
             <DropdownMenuContent align="end" className="w-96">
               <DropdownMenuItem className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer">Report</DropdownMenuItem>
               <DropdownMenuSeparator />
+              {userDetails?.id == post?.author?._id &&
+                <>
+                  <DropdownMenuItem onClick={e => handleDeletePost(e, post?._id)} className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer">Delete</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              }
               {followingUserss?.includes(post.author._id) && (
                 <>
                   <DropdownMenuItem
@@ -170,8 +176,8 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                   </CarouselItem>
                 ))}
               </CarouselContent>
-              <CarouselPrevious />
-              <CarouselNext />
+              <CarouselPrevious className="left-3 dark:text-white" />
+              <CarouselNext className="right-3 dark:text-white" />
             </Carousel>
           )
           :

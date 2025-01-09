@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, matchPath } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
@@ -17,58 +17,80 @@ import { ChatComponent } from './components/Chat/instagram-chat';
 import Dashboard from './components/Profile/user-dashboard';
 import { VideoCallProvider } from './hooks/VideoCallContext';
 import VideoCall from './components/Chat/VideoCall';
-import Notification from './components/Home/Notification';
-import GroupDetails from './components/Chat/GroupDetails';
+import Sidebar from './components/Home/Sidebar';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-function App() {
+
+function ChildApp() {
   const userDetails = useSelector((state) => state.counter.userDetails);
   const dispatch = useDispatch();
-  const socketRef = useRef(null); // Use ref to hold socket connection
-  
+  const socketRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation(); // Access the current route
+
   useEffect(() => {
-    // Initialize socket only when userDetails is available
     if (userDetails.id) {
       const socket = io('http://localhost:5000', {
         query: { userId: userDetails.id },
       });
-  
-      socketRef.current = socket; // Assign socket instance to ref
-  
-      // Listen for 'getOnlineUsers' event and dispatch online users to Redux
+
+      socketRef.current = socket;
+
       socket.on('getOnlineUsers', (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
       });
-  
-      // Clean up socket connection when component unmounts
+
+      socket.on('videoCallOffer', async ({ from, offer }) => {
+        if (offer.type === 'offer') {
+          navigate(`/call/${from}`);
+        }
+      });
+
       return () => {
         socket.disconnect();
-        dispatch(setOnlineUsers([])); // Reset online users
+        dispatch(setOnlineUsers([]));
       };
     }
-  }, [userDetails, dispatch]);
-  
-  return (
-    <Router>
-      <Navbar />
-      {/* <VideoCallProvider socketRef={socketRef}> */}
+  }, [userDetails, dispatch, navigate]);
 
+  const hideNavbar = ['/login', '/register','/direct/inbox'].includes(location.pathname) || 
+  matchPath("/profile/:username", location.pathname) ||
+  matchPath("/call/:remoteUserId/", location.pathname) ||
+  matchPath("/profile/:username/:reelId", location.pathname);
+  
+
+  // Define routes where the Sidebar should be visible, excluding login and register paths
+  const showSidebar = ['/','/profile/:username', '/explore', '/reels', '/admindashboard']
+    .some((path) => location.pathname.startsWith(path)) && !['/login', '/register','/direct/inbox'].includes(location.pathname);
+
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
+      {showSidebar && <Sidebar />}
       <Routes>
-        <Route path="/" element={<ProtectedRoute><Home socketRef={socketRef}/></ProtectedRoute>} />
-        <Route path="/profile/:username" element={<ProtectedRoute><Profile/></ProtectedRoute>} />
-        <Route path="/profile/:username/:reelId" element={<ProtectedRoute><Profile/></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><Home socketRef={socketRef} /></ProtectedRoute>} />
+        <Route path="/profile/:username" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/profile/:username/:reelId" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/direct/inbox" element={<ProtectedRoute><ChatComponent socketRef={socketRef} /></ProtectedRoute>} />
         <Route path="/explore/" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
         <Route path="/reels/" element={<ProtectedRoute><ReelSection /></ProtectedRoute>} />
-        <Route path="/call/:remoteUserId/" element={<ProtectedRoute><VideoCall  userId={userDetails?.id} socketRef={socketRef} /></ProtectedRoute>} />
+        <Route path="/call/:remoteUserId/" element={<ProtectedRoute><VideoCall userId={userDetails?.id} socketRef={socketRef} /></ProtectedRoute>} />
         <Route path="/accounts/edit/:id" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} />
         <Route path="/admindashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/groupdetails" element={<ProtectedRoute><GroupDetails /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
-      {/* </VideoCallProvider> */}
-
       <BottomNavigation />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ChildApp />
+      <ToastContainer />
     </Router>
   );
 }

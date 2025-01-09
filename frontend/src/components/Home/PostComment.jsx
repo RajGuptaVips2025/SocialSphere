@@ -34,9 +34,9 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
     const fetchComments = async () => {
         try {
             const response = await axios.get(`/api/posts/${PostDetails?._id}/comment`);
-            setCommentsArr(response.data.comments);
+            setCommentsArr(response?.data?.comments);
         } catch (error) {
-            if (error.response.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
+            if (error?.response?.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
             console.error('Error fetching comments:', error);
         }
     };
@@ -186,7 +186,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
                                         <CarouselNext className="right-1 dark:text-white" />
                                     </Carousel>
                                 ) : (
-                                    selectedMedia?.media?.mediaPath?.endsWith(".mp4") || selectedMedia?.mediaPath?.endsWith(".webm") ? (
+                                    selectedMedia?.media[0]?.mediaPath?.endsWith(".mp4") || selectedMedia?.mediaPath?.endsWith(".webm") ? (
                                         <video src={selectedMedia?.media[0]?.mediaPath} autoPlay controls className="w-full h-full rounded-xl" />
                                     ) : (
                                         <img
@@ -201,7 +201,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
                                 <div className="author border-b-[.1px] border-zinc-800 w-full h-[70px] flex items-center px-4">
                                     <div className="flex items-center gap-2">
                                         <Avatar>
-                                            <AvatarImage src={PostDetails?.author?.profilePicture} alt={`${PostDetails?.author?.username}'s profile`} />
+                                            <AvatarImage className="object-cover object-top" src={PostDetails?.author?.profilePicture} alt={`${PostDetails?.author?.username}'s profile`} />
                                             <AvatarFallback>{PostDetails?.author?.username}</AvatarFallback>
                                         </Avatar>
                                         <div className="authorDetail">
@@ -215,9 +215,9 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
                                     </div>
                                 </div>
 
-                                <div className={`comments-section flex-1 overflow-y-auto p-4 ${commentsArr.length === 0 ? 'flex justify-center items-center' : ''}`}>
-                                    {commentsArr.length > 0 ? (
-                                        commentsArr.map((comment) => (
+                                <div className={`comments-section flex-1 overflow-y-auto p-4 ${commentsArr?.length === 0 ? 'flex justify-center items-center' : ''}`}>
+                                    {commentsArr?.length > 0 ? (
+                                        commentsArr?.map((comment) => (
                                             <div key={comment._id} className="mb-4">
                                                 <div className="flex justify-between items-start">
                                                     <div className='flex items-start gap-3 flex-1'>

@@ -37,7 +37,6 @@ const groupChatSchema = new mongoose.Schema({
       message: {
         type: String
       },
-      iv: { type: String },       
       messageType: {
         type: String,
         enum: ['text', 'image', 'video'],  // For future support of multimedia messages
@@ -52,7 +51,6 @@ const groupChatSchema = new mongoose.Schema({
       }
     }
   ],
-  iv: { type: String }, 
   createdBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
