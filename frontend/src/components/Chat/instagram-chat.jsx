@@ -16,6 +16,7 @@ import { setFollowingUsers, setMessages, setSuggestedUser } from '@/features/use
 import ChatBox from "./ChatBox"
 import { SearchDialogWithCheckboxesComponent } from "./search-dialog-with-checkboxes"
 import { IoIosArrowDown } from "react-icons/io";
+import Sidebar from "../Home/Sidebar"
 
 
 export function ChatComponent({ socketRef }) {
@@ -136,20 +137,10 @@ export function ChatComponent({ socketRef }) {
     (<div className="flex h-screen">
       <div className="flex-1 flex dark:bg-neutral-950 dark:text-white">
         {/* Sidebar */}
-        <div className="h-screen w-[5.3%] hidden md:flex flex-col gap-7 items-center border-r-[.1px] border-zinc-800">
-          <div className="instaIcon my-8">
-            <Link to="/">
-              <FaInstagram size={26} />
-            </Link>
-          </div>
-          {links.map((link) => (
-            <Link to={link.link} key={link.id} className="flex items-center justify-between">
-              {link.icon}
-            </Link>
-          ))}
-        </div>
+        
+        <Sidebar compact/>
         <div
-          className={` ${suggestedUser?"w-0":'w-full'}  md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}>
+          className={` ${suggestedUser?"w-0":'w-full'} ml-20  md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}>
           <div
             className="p-4 border-gray-200 dark:border-zinc-800 dark:bg-neutral-950 dark:text-white flex justify-between items-center">
             <div className="flex items-center space-x-2">
@@ -157,12 +148,7 @@ export function ChatComponent({ socketRef }) {
             </div>
             <div className="flex space-x-2">
             <SearchDialogWithCheckboxesComponent socketRef={socketRef} />
-              {/* <Button
-                variant="ghost"
-                size="sm"
-                className="px-2 text-black dark:bg-neutral-950 dark:text-white">
-                <FaRegEdit size={20} />
-              </Button> */}
+
             </div>
           </div>
           <div
