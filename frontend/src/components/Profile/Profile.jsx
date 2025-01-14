@@ -3,13 +3,11 @@ import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFollower, setFollowing, setSelectedPost } from '../../features/userDetail/userDetailsSlice';
-import Sidebar from '../Home/Sidebar';
-import CreatePost from './CreatePost';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BookmarkIcon, Clapperboard, EyeIcon, GridIcon, MessageCircle, MoreHorizontal, Settings, SettingsIcon, UserIcon } from "lucide-react"
+import { BookmarkIcon, Clapperboard, GridIcon, MoreHorizontal, SettingsIcon, UserIcon } from "lucide-react"
 import { FaHeart } from 'react-icons/fa';
 import { InstagramProfileSkeletonComponent } from './instagram-profile-skeleton';
 import { IoChatbubbleSharp } from 'react-icons/io5';
@@ -23,7 +21,6 @@ const Profile = () => {
   const { username, reelId } = useParams();
   const [user, setUser] = useState(null);
   const [userID, setUserID] = useState(null);
-  const [posts, setPosts] = useState([]);
   const [postsArr, setPostsArr] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +46,7 @@ const Profile = () => {
       setUser(data.user);
 
       // Append new posts to the existing posts array for pagination
-      setPostsArr((prevPosts) => [...prevPosts, ...data?.posts]);
+      setPostsArr((prevPosts) => [...prevPosts, ...data.posts]);
 
       // Filter watched posts based on user's watch history
       setWatched(data?.posts?.filter(post =>
@@ -160,11 +157,7 @@ const Profile = () => {
     return () => window.removeEventListener('scroll', handleScroll); // Clean up on unmount
   }, [handleScroll]);
 
-  if (!user) return <p>Loading...</p>;
-
-  const handletick = (() => {
-    console.log("jai mata di", "user"); //error
-  })
+  if (!user) return <p>Loading...</p>
 
   return (
 
@@ -300,7 +293,6 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
-                {userDetails?.id === userID && <CreatePost />}
 
               </TabsContent>
 
