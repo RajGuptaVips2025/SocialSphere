@@ -6,17 +6,35 @@ import axios from 'axios';
 import { AiOutlineMessage } from 'react-icons/ai';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { Camera, Heart, Info, Mic, Phone, Smile, Video, X } from 'lucide-react';
+import { Camera, Info, Phone, Smile, Video, X } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { ReloadIcon } from '@radix-ui/react-icons';
-import { Dialog, DialogTrigger, DialogContent, DialogClose } from "../ui/dialog";
+import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
 import VideoCall from './VideoCall';
-// import { useVideoCall } from '@/hooks/VideoCallContext';
+import EmojiPicker from "emoji-picker-react";
+import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
+import { Input } from '../ui/input';
+import { Checkbox } from '../ui/checkbox';
+import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 
 function ChatBox() {
-    // const { startCall, localVideoRef, remoteVideoRef } = useVideoCall();
-    const suggestedUser = useSelector((state) => state.counter.suggestedUser);
+    let suggestedUser = useSelector((state) => state.counter.suggestedUser);
+    const [groupMembers, setGroupMembers] = useState([]);
+
+    // Fetch and set group members when `suggestedUser` changes
+    useEffect(() => {
+        const members =
+            suggestedUser?.members?.map((member) => ({
+                _id: member.userId._id,
+                username: member.userId.username,
+                profilePic: member.userId.profilePicture || "/default-avatar.png",
+                role: member.role,
+            })) || [];
+        setGroupMembers(members);
+    }, [suggestedUser]);
     const userDetails = useSelector((state) => state.counter.userDetails);
     const messages = useSelector((state) => state.counter.messages);
     const [textMessage, setTextMessage] = useState('')
@@ -26,10 +44,52 @@ function ChatBox() {
     const dispatch = useDispatch()
     const navigate = useNavigate();
     const messagesEndRef = useRef(null);
-
     const [selectedMedia, setSelectedMedia] = useState(null); // To track selected media
     const [isDialogOpen, setIsDialogOpen] = useState(false);  // To handle dialog state
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [selected, setSelected] = useState([]);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState([]);
+    const [isChangeGroupNameDialogOpen, setIsChangeGroupNameDialogOpen] = useState(false);
+    const [isAddPeopleDialogOpen, setIsAddPeopleDialogOpen] = useState(false);
+    const [newGroupName, setNewGroupName] = useState('');
+    const [loading, setLoading] = useState(false);
 
+    const handleSave = async () => {
+        if (!newGroupName.trim()) {
+            alert('Group name cannot be empty.');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const groupId = suggestedUser._id;
+            // Replace `/api/group/${groupId}/rename` with your actual backend endpoint
+            const response = await axios.put(`/api/conversations/group/update/groupName/${groupId}`, {
+                groupName: newGroupName.trim(),
+            });
+
+            setIsChangeGroupNameDialogOpen(false);
+        } catch (error) {
+            alert(error.response?.data?.message || 'Failed to update group name.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSelect = (user) => {
+        if (selected.some((item) => item._id === user._id)) {
+            setSelected(selected.filter((item) => item._id !== user._id));
+        } else {
+            setSelected([...selected, user]);
+        }
+    };
+
+    const handleEmojiClick = (emojiObject) => {
+        setTextMessage((prev) => prev + emojiObject.emoji); // Append the selected emoji to the message
+        setShowEmojiPicker(false); // Hide the emoji picker after selection
+    };
 
     const removeSuggestedUser = (e) => {
         e.preventDefault()
@@ -44,7 +104,7 @@ function ChatBox() {
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
-        
+
         if (selectedFile) {
             setFile(selectedFile);
             setFilePreview(URL.createObjectURL(selectedFile)); // Generate preview URL
@@ -111,6 +171,70 @@ function ChatBox() {
         }
     };
 
+    const handleSearchChange = async (e) => {
+        const searchQuery = e.target.value;
+        setQuery(searchQuery);
+        if (searchQuery) {
+            try {
+                const response = await axios.get(`/api/search/users?query=${searchQuery}`);
+                // console.log(response.data)
+                setResults(response.data);
+            } catch (error) {
+                console.error('Error fetching search results:', error);
+            }
+        } else {
+            setResults([]);
+        }
+    };
+
+    // Handle deselection of a user when the cross button is clicked
+    const handleDeselect = (userId) => {
+        setSelected((prev) => prev.filter((id) => id !== userId));
+    };
+
+    const handleAddMembers = async () => {
+        if (selected.length === 0) return;
+
+        try {
+            const groupId = suggestedUser._id; // Replace with dynamic groupId
+            const members = selected.map((user) => user._id);
+
+            for (const userId of members) {
+                const response = await axios.put(`/api/conversations/group/add/member/${groupId}`, { userId });
+                console.log(`Added user ${userId}:`, response.data);
+                setGroupMembers((prevGroupMembers) => [
+                    ...prevGroupMembers, 
+                    response.data.newUser
+                  ]);
+            }
+            setIsAddPeopleDialogOpen(false); // Close the dialog after success
+            setSelected([]); // Clear the selected users
+        } catch (error) {
+            console.error("Failed to add members:", error);
+            alert("An error occurred while adding members.");
+        }
+    };    
+
+    const handleRemoveMember = async (userId) => {
+        try {
+          const groupId = suggestedUser._id; // Ensure this is the correct group ID
+      
+          // Send request to remove member
+          const response = await axios.put(`/api/conversations/group/remove/member/${groupId}`, {
+            userId,
+          });      
+          // Update state dynamically to remove the member from the list at runtime
+          setGroupMembers((prevMembers) => {
+            const updatedMembers = prevMembers.filter((member) => member._id != userId);
+            console.log("Updated members:", updatedMembers); // Log to ensure state is updating
+            return updatedMembers;
+          });
+      
+        } catch (error) {
+          console.error(`Failed to remove user ${userId}:`, error);
+          alert(`An error occurred while removing the user with ID ${userId}.`);
+        }
+      };
     return (
         <>
             {/* <VideoCall userId={userDetails?.id} socketRef={socketRef} remoteUserId={suggestedUser?._id}  /> */}
@@ -119,7 +243,7 @@ function ChatBox() {
                     <div
                         className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                         <div className="flex items-center space-x-3">
-                            <span onClick={removeSuggestedUser} className='text-3xl inline-block md:hidden '>←</span>
+                            <span onClick={removeSuggestedUser} className='text-3xl inline-block md:hidden'>←</span>
                             <Avatar>
                                 <AvatarImage className="object-cover object-top" src={suggestedUser?.profilePicture} />
                                 <AvatarFallback>{suggestedUser && 'groupName' in suggestedUser ? suggestedUser?.groupName : suggestedUser?.username}</AvatarFallback>
@@ -132,16 +256,208 @@ function ChatBox() {
                             </div>
                         </div>
                         <div className="flex">
+                            {/* Add your content here */}
                             <Button variant="ghost" size="sm" className="text-black dark:text-white">
                                 <Phone className="h-6 w-6" />
                             </Button>
-                            {/* <Button onClick={()=>startCall(suggestedUser?._id)} variant="ghost" size="sm" className="text-black dark:text-white"> */}
                             <Button onClick={() => navigate(`/call/${suggestedUser?._id}`)} variant="ghost" size="sm" className="text-black dark:text-white">
                                 <Video className="h-7 w-7" />
                             </Button>
-                            <Button variant="ghost" size="sm" className="text-black dark:text-white hidden md:block ">
-                                <Info className="h-6 w-6" />
-                            </Button>
+
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="text-black dark:text-white hidden md:block">
+                                        <Info className="h-6 w-6" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="right" className="p-6 bg-white dark:bg-gray-900">
+                                    <div className="space-y-6">
+                                        <h2 className="text-xl font-bold">Details</h2>
+                                        {/* Members Section */}
+                                        {groupMembers.length > 0 ? (
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-1">
+                                                        <p className="text-sm font-medium">Change group name</p>
+                                                    </div>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => setIsChangeGroupNameDialogOpen(true)}
+                                                    >
+                                                        Change
+                                                    </Button>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-lg font-bold">Members</h3>
+                                                    <button
+                                                        onClick={() => setIsAddPeopleDialogOpen(true)}
+                                                        className="text-blue-500 text-sm font-medium"
+                                                    >
+                                                        Add people
+                                                    </button>
+                                                </div>
+                                                <div className="space-y-3">
+                                                    {groupMembers.map((member) => (
+                                                        <div key={member._id} className="flex items-center justify-between">
+                                                            <div className="flex items-center space-x-3">
+                                                                <img
+                                                                    src={member.profilePic || "/default-avatar.png"} // Fallback if `profilePic` is undefined
+                                                                    alt="Profile"
+                                                                    className="w-10 h-10 rounded-full object-cover"
+                                                                />
+                                                                <div>
+                                                                    <p className="font-medium">{member.username}</p>
+                                                                    <p className="text-sm text-gray-500">{member.role}</p>
+                                                                </div>
+                                                            </div>
+                                                            {/* Three dots with Dropdown Menu */}
+                                                            {member.role === "member" && (
+                                                                <DropdownMenu className="cursor-pointer">
+                                                                    <DropdownMenuTrigger asChild>
+                                                                        <button className="text-gray-500 hover:text-gray-700">
+                                                                            <svg
+                                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                                fill="none"
+                                                                                viewBox="0 0 24 24"
+                                                                                strokeWidth="1.5"
+                                                                                stroke="currentColor"
+                                                                                className="w-6 h-6"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    d="M12 6.75a.75.75 0 100-1.5.75.75 0 000 1.5zM12 12a.75.75 0 100-1.5.75.75 0 000 1.5zM12 17.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                                                                                />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent align="end">
+                                                                        <DropdownMenuItem
+                                                                            onClick={() => handleRemoveMember(member._id)}
+                                                                            className="cursor-pointer hover:text-red-500"
+                                                                        >
+                                                                            Remove User
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    <Button variant="ghost" className="text-red-500 w-full text-left">
+                                                        Leave Chat
+                                                    </Button>
+                                                    <Button variant="ghost" className="text-red-500 w-full text-left">
+                                                        Delete Chat
+                                                    </Button>
+                                                    <p className="text-xs text-gray-500">
+                                                        You won't be able to send or receive messages unless someone adds you back to the chat. No one will be notified that you left the chat.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-gray-500">No members found.</p> // Fallback for empty members
+                                        )}
+                                    </div>
+                                    <Dialog open={isChangeGroupNameDialogOpen} onOpenChange={setIsChangeGroupNameDialogOpen}>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Change Group Name</DialogTitle>
+                                            </DialogHeader>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter new group name"
+                                                className="w-full mt-4 border border-gray-300 rounded p-2"
+                                                value={newGroupName}
+                                                onChange={(e) => setNewGroupName(e.target.value)}
+                                            />
+                                            <DialogFooter>
+                                                <Button variant="outline" onClick={() => setIsChangeGroupNameDialogOpen(false)}>
+                                                    Cancel
+                                                </Button>
+                                                <Button onClick={handleSave} disabled={loading}>
+                                                    {loading ? 'Saving...' : 'Save'}
+                                                </Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+
+
+                                    {/* Add People Dialog */}
+                                    <Dialog
+                                        open={isAddPeopleDialogOpen}
+                                        onOpenChange={setIsAddPeopleDialogOpen}
+                                    >
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Add:</DialogTitle>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {selected.map((user) => (
+                                                        <div
+                                                            key={user._id}
+                                                            className="flex items-center bg-blue-100 text-blue-600 px-3 py-1 rounded-full space-x-2"
+                                                        >
+                                                            <span className="text-sm">{user.username}</span>
+                                                            <button
+                                                                className="text-blue-600 hover:text-blue-800"
+                                                                onClick={() => handleDeselect(user)}
+                                                            >
+                                                                &times;
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <DialogClose />
+                                            </DialogHeader>
+                                            <div className="space-y-4">
+                                                <Input
+                                                    placeholder="Search..."
+                                                    value={query}
+                                                    onChange={handleSearchChange}
+                                                />
+                                                <ScrollArea className="h-60">
+                                                    <ul className="space-y-2">
+                                                        {results.length > 0 &&
+                                                            results.map((user) => (
+                                                                <li
+                                                                    key={user._id}
+                                                                    className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-md"
+                                                                >
+                                                                    <div className="flex items-center space-x-4">
+                                                                        <Avatar>
+                                                                            <AvatarImage
+                                                                                src={user.profilePicture || "/default-profile.png"}
+                                                                                alt={user.username}
+                                                                                className="object-cover"
+                                                                            />
+                                                                            <AvatarFallback>
+                                                                                {user.username.charAt(0).toUpperCase()}
+                                                                            </AvatarFallback>
+                                                                        </Avatar>
+                                                                        <p className="text-sm text-gray-500">{user.username}</p>
+                                                                    </div>
+                                                                    <Checkbox
+                                                                        checked={selected.some((item) => item._id === user._id)}
+                                                                        onCheckedChange={() => handleSelect(user)}
+                                                                    />
+                                                                </li>
+                                                            ))}
+                                                    </ul>
+                                                </ScrollArea>
+                                                <Button
+                                                    className="w-full"
+                                                    disabled={selected.length === 0}
+                                                    onClick={handleAddMembers}
+                                                >
+                                                    Add
+                                                </Button>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
+
+                                </SheetContent>
+                            </Sheet>
                         </div>
                     </div>
                     <ScrollArea className="flex-grow py-1 px-2 md:px-6">
@@ -266,7 +582,19 @@ function ChatBox() {
                                 onSubmit={(e) => sendMessageHandle(e, suggestedUser._id)}
                                 className="flex items-center space-x-2 md:space-x-4 border border-zinc-800 bg-transparent rounded-full px-4 py-2"
                             >
-                                <Smile className="h-6 w-6 text-black dark:text-white" />
+                                {/* <Smile className="h-6 w-6 text-black dark:text-white" /> */}
+                                {/* Smile Icon */}
+                                <div className="relative">
+                                    <Smile
+                                        onClick={() => setShowEmojiPicker((prev) => !prev)}
+                                        className="h-6 w-6 text-black dark:text-white cursor-pointer"
+                                    />
+                                    {showEmojiPicker && (
+                                        <div className="absolute bottom-full left-0 mb-2 z-10">
+                                            <EmojiPicker onEmojiClick={handleEmojiClick} />
+                                        </div>
+                                    )}
+                                </div>
                                 <input
                                     value={textMessage}
                                     onChange={(e) => setTextMessage(e.target.value)}
@@ -308,7 +636,9 @@ function ChatBox() {
                                 <p className='text-zinc-500 text-sm'>Send a message to start a chat.</p>
                             </div>
                             <div className="flex justify-center items-center my-2">
-                                <button className='bg-blue-500 text-sm font-semibold text-white px-3 py-2 rounded-md'> send message</button>
+                                <button className='bg-blue-500 text-sm font-semibold text-white px-3 py-2 rounded-md'>
+                                    send message
+                                </button>
                             </div>
                         </div>
                     </div>

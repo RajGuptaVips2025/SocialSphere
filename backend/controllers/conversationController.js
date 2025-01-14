@@ -95,7 +95,7 @@ const getAllMessages = async (req, res) => {
       ]
     });
 
-    
+
     if (!conversation) {
       return res.status(201).json({ success: true, messages: [] });
     }
@@ -155,11 +155,10 @@ const getUserGroups = async (req, res) => {
       ]
     }).populate({
       path: 'members.userId',
-      select: 'fullName username' // Include fullName and username, exclude password
+      select: 'fullName username profilePicture' // Include fullName and username, exclude password
     }); // Exclude password field
 
     if (!groups) return res.status(401).json({ message: "not in any group" });
-
 
     res.status(200).json(groups);
   } catch (error) {
@@ -233,31 +232,95 @@ const getGroupMessages = async (req, res) => {
 };
 
 // Add a member to the group chat
+// const addMemberToGroup = async (req, res) => {
+//   try {
+//     // console.log("line 237 Group ID:", req.params.groupId);
+//     // console.log("line 238 Request body:", req.body);
+//     const groupId = req.params.groupId;
+//     const { userId } = req.body;
+
+//     const groupChat = await GroupChat.findById(groupId);
+//     if (!groupChat) {
+//       return res.status(404).json({ error: 'Group chat not found' });
+//     }
+
+//     // Check if the user is already in the group
+//     const isMember = groupChat.members.some(member => member.userId.toString() === userId);
+//     if (isMember) {
+//       return res.status(400).json({ error: 'User is already a member' });
+//     }
+
+//     groupChat.members.push({ userId });
+//     const groupMember = await User.findById(userId).select("username profilePicture");
+//     groupMember.role="member";
+//     console.log(groupMember);
+//     await groupChat.save();
+
+//     res.status(200).json({ success: true, message: 'Member added successfully', newUser: groupMember});
+//   } catch (error) {
+//     console.error(error.message);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
+
+
+
+
+// Add a member to the group chat
 const addMemberToGroup = async (req, res) => {
   try {
-    const groupId = req.params.groupId;
+    const { groupId } = req.params;
     const { userId } = req.body;
+    console.log(userId);
 
+    // Validate inputs
+    if (!groupId || !userId) {
+      return res.status(400).json({ error: "Group ID and User ID are required" });
+    }
+
+    // Fetch the group chat
     const groupChat = await GroupChat.findById(groupId);
     if (!groupChat) {
-      return res.status(404).json({ error: 'Group chat not found' });
+      return res.status(404).json({ error: "Group chat not found" });
     }
 
     // Check if the user is already in the group
-    const isMember = groupChat.members.some(member => member.userId.toString() === userId);
+    const isMember = groupChat.members.some(
+      (member) => member.userId.toString() === userId
+    );
     if (isMember) {
-      return res.status(400).json({ error: 'User is already a member' });
+      return res.status(400).json({ error: "User is already a member" });
     }
 
-    groupChat.members.push({ userId });
+    // Fetch the user and add them to the group
+    const groupMember = await User.findById(userId).select("username profilePicture");
+    if (!groupMember) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Add the user to the group with a default role
+    groupChat.members.push({ userId, role: "member" });
     await groupChat.save();
 
-    res.status(200).json({ success: true, message: 'Member added successfully' });
+    // Respond with the newly added member's details
+    res.status(200).json({
+      success: true,
+      message: "Member added successfully",
+      newUser: {
+        _id: groupMember._id,
+        username: groupMember.username,
+        profilePic: groupMember.profilePicture || "/default-avatar.png",
+        role: "member",
+      },
+    });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error adding member to group:", error.message);
+    res.status(500).json({ error: "Server error" });
   }
 };
+
+
 
 // Remove a member from the group chat
 const removeMemberFromGroup = async (req, res) => {
@@ -280,6 +343,40 @@ const removeMemberFromGroup = async (req, res) => {
   }
 };
 
+const renameGroup = async (req, res) => {
+  try {
+    const groupId = req.params.groupId;
+    const { groupName } = req.body;
+
+    // Validate the new group name
+    if (!groupName || groupName.trim().length === 0) {
+      return res.status(400).json({ message: 'Group name cannot be empty.' });
+    }
+
+    // Trim group name to avoid unintended whitespace issues
+    const trimmedGroupName = groupName.trim();
+
+    // Update the group name
+    const updatedGroup = await GroupChat.findByIdAndUpdate(
+      groupId,
+      { groupName: trimmedGroupName, updatedAt: Date.now() }, // Update `updatedAt` timestamp
+      { new: true, runValidators: true } // Return updated document and run validators
+    );
+
+    if (!updatedGroup) {
+      return res.status(404).json({ message: 'Group not found or invalid group ID.' });
+    }
+
+    res.status(200).json({ message: 'Group name updated successfully.', group: updatedGroup });
+  } catch (error) {
+    res.status(500).json({
+      message: 'An error occurred while updating the group name.',
+      error: error.message,
+    });
+  }
+};
+
+
 
 module.exports = {
   sendMessage,
@@ -290,5 +387,6 @@ module.exports = {
   getGroupMessages,
   addMemberToGroup,
   removeMemberFromGroup,
-  getUserGroups
+  getUserGroups,
+  renameGroup
 };

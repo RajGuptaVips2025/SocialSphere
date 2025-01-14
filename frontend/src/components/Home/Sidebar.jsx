@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BiSolidMoviePlay } from "react-icons/bi";
 import { FiSend } from "react-icons/fi";
 import { CiSquarePlus } from "react-icons/ci";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { Button } from '../ui/button';
@@ -24,15 +24,17 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
+import { ReloadIcon } from '@radix-ui/react-icons';
 
 
-function Sidebar() {
+function Sidebar({ compact = false }) {
     const userDetails = useSelector((state) => state.counter.userDetails);
     let RTMNotification = useSelector((state) => state.counter.rtmNotification);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isSearchOpenMobile, setIsSearchOpenMobile] = useState(false);
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);  // State to toggle notification sheet
     const [query, setQuery] = useState('');
+    const navigate = useNavigate()
     const [results, setResults] = useState([]);
     RTMNotification = Object.values(RTMNotification);
     const [caption, setCaption] = useState('');
@@ -42,7 +44,17 @@ function Sidebar() {
     const [step, setStep] = useState(1)
     const [selectedImage, setSelectedImage] = useState(null)
     const [file, setFile] = useState([]); // Array to store multiple files
+    const [getRes, setGetRes] = useState(false)
     const [filePreview, setFilePreview] = useState([]); // Array to store file previews
+    const [wideView, setWideView] = useState({ isOpen: false, media: null });
+    console.log(wideView);
+    const openWideView = (media) => {
+        setWideView({
+            isOpen: true,
+            media, // Set the media object here
+        });
+    };
+
 
     const handleMediaChange = (event) => {
         const files = Array.from(event.target.files);
@@ -80,6 +92,7 @@ function Sidebar() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
+        setGetRes(true)
 
         // Append each file to formData
         file.forEach((file) => {
@@ -96,16 +109,18 @@ function Sidebar() {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            console.log("Submitting with image:", selectedImage)
+            console.log("Submitting with image:", response.data)
             setIsOpen(false)
             setStep(1)
             setSelectedImage(null)
-            //   navigate('/');
+            navigate(`/profile/${userDetails.username}`);
 
         } catch (error) {
             console.error('Error creating post:', error);
         } finally {
             setIsResOk(true);
+            setGetRes(false)
+
         }
     };
 
@@ -131,7 +146,7 @@ function Sidebar() {
             setResults([]);
         }
     };
-    
+
     const handleNext = () => {
         if (media.length <= 10) {
             setStep(2)
@@ -177,11 +192,11 @@ function Sidebar() {
     return (
         <>
             <aside
-                className={`fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col w-[72px] lg:w-60 p-3 border-r border-zinc-300 dark:border-zinc-800 bg-white dark:text-white dark:bg-neutral-950`}>
+                className={`fixed left-0 top-0 bottom-0 z-30 hidden md:flex flex-col w-[72px] ${compact ? "lg:w-20" : "lg:w-60"} p-3 border-r border-zinc-300 dark:border-zinc-800 bg-white dark:text-white dark:bg-neutral-950`}>
                 <Link to='/'>
                     <h1 className="text-xl font-semibold mb-8 mt-8 ml-4 flex gap-2">
                         <Instagram />
-                        <span className='hidden lg:inline'>Instagram</span>
+                        {!compact && <span className='hidden lg:inline'>Instagram</span>}
                     </h1>
                 </Link>
                 <nav className="space-y-5 flex-grow">
@@ -191,7 +206,8 @@ function Sidebar() {
                                 <>
                                     <Button variant="ghost" className="w-full justify-start relative" onClick={link.onClick}>
                                         <span className='w-8 h-8'>{link.icon}</span>
-                                        <span className='hidden lg:inline'>{link.label}</span>
+                                        {/* <span className='hidden lg:inline>{link.label}</span> */}
+                                        {!compact && <span className="hidden lg:inline">{link.label}</span>}
                                         {RTMNotification && RTMNotification.length > 0 && (
                                             <div className="absolute top-1 left-8 h-3 w-3 rounded-full bg-red-500 border-2 border-black text-xs">
                                                 {/* Notification badge */}
@@ -229,7 +245,7 @@ function Sidebar() {
                                 <>
                                     <Button variant="ghost" className="w-full justify-start relative" onClick={link.onClick}>
                                         <span className='w-8 h-8'>{link.icon}</span>
-                                        <span className='hidden lg:inline'>{link.label}</span>
+                                        {!compact && <span className="hidden lg:inline">{link.label}</span>}
                                     </Button>
                                     <Sheet open={isSearchOpen} onOpenChange={setIsSearchOpen}>
                                         <SheetTrigger asChild>
@@ -267,10 +283,10 @@ function Sidebar() {
                                         <DialogTrigger asChild>
                                             <div className="flex ml-4 cursor-pointer">
                                                 <span>{link.icon}</span>
-                                                <span>{link.label}</span>
+                                                {!compact && <span className="hidden lg:inline">{link.label}</span>}
                                             </div>
                                         </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[800px] h-[400px]">
+                                        <DialogContent className="sm:max-w-[800px] h-auto">
                                             <DialogHeader>
                                                 <DialogTitle>{step === 1 ? "Select Post" : "Confirm Submission"}</DialogTitle>
                                             </DialogHeader>
@@ -293,7 +309,7 @@ function Sidebar() {
                                                             navigation
                                                             spaceBetween={10}
                                                             slidesPerView={4}
-                                                            className="w-full h-[100px]"
+                                                            className="w-full h-[100px] mt-2"
                                                         >
                                                             {filePreview.map((preview, index) => (
                                                                 <SwiperSlide key={index}>
@@ -302,14 +318,16 @@ function Sidebar() {
                                                                             <img
                                                                                 src={preview.url}
                                                                                 alt="Selected"
-                                                                                className="w-full h-full object-cover rounded-md"
+                                                                                className="w-full h-full object-cover rounded-md cursor-pointer"
+                                                                                onClick={() => openWideView(preview)} // Open wide view
                                                                                 loading="lazy"
                                                                             />
                                                                         ) : (
                                                                             <video
                                                                                 src={preview.url}
                                                                                 controls
-                                                                                className="w-full h-full object-cover rounded-md"
+                                                                                className="w-full h-full object-cover rounded-md cursor-pointer"
+                                                                                onClick={() => openWideView(preview)} // Open wide view
                                                                             />
                                                                         )}
                                                                         {/* Clear Icon */}
@@ -340,21 +358,61 @@ function Sidebar() {
                                                             className="w-full border-none focus:outline-none resize-none"
                                                         />
                                                     </div>
-                                                    <Button onClick={handleSubmit} className="w-full">
-                                                        Submit
-                                                    </Button>
+                                                    {getRes ? (
+                                                        <Button disabled type="submit">
+                                                            <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                                            Create Post
+                                                        </Button>
+                                                    ) : (
+                                                        <Button onClick={handleSubmit} className="w-full">
+                                                            Create Post
+                                                        </Button>
+                                                    )}
                                                 </div>
-
-                                                // <div className="grid gap-4 py-4">
-                                                //     {/* TipTap editor for caption */}
-                                                //     <div className="border p-4 rounded-lg">
-                                                //         <EditorContent editor={editor} />
-                                                //     </div>
-                                                //     <Button onClick={handleSubmit} className="w-full">
-                                                //         Submit
-                                                //     </Button>
-                                                // </div>
                                             )}
+                                        </DialogContent>
+                                    </Dialog>
+
+                                    {/* Dialog for wide view */}
+                                    <Dialog open={wideView.isOpen} onOpenChange={() => setWideView({ ...wideView, isOpen: false })}>
+                                        <DialogContent className="sm:max-w-[800px] h-auto">
+                                            <DialogHeader>
+                                                <DialogTitle>Media Preview</DialogTitle>
+                                            </DialogHeader>
+                                            {/* <div className="w-full h-full flex justify-center items-center">
+                                                {wideView?.media?.isImage ? (
+                                                    <img
+                                                        src={wideView?.media?.url}
+                                                        alt="Preview"
+                                                        className="max-w-full max-h-[80vh] object-contain rounded-md"
+                                                    />
+                                                ) : (
+                                                    <video
+                                                        src={wideView?.media?.url}
+                                                        controls
+                                                        className="max-w-full max-h-[80vh] object-contain rounded-md"
+                                                    />
+                                                )}
+                                            </div> */}
+                                            <div className="w-full h-full flex justify-center items-center">
+                                                {wideView?.media ? (
+                                                    wideView.media.isImage ? (
+                                                        <img
+                                                            src={wideView.media.url}
+                                                            alt="Preview"
+                                                            className="max-w-full max-h-[80vh] object-contain rounded-md"
+                                                        />
+                                                    ) : (
+                                                        <video
+                                                            src={wideView.media.url}
+                                                            controls
+                                                            className="max-w-full max-h-[80vh] object-contain rounded-md"
+                                                        />
+                                                    )
+                                                ) : (
+                                                    <p>No media available for preview.</p>
+                                                )}
+                                            </div>
                                         </DialogContent>
                                     </Dialog>
                                 </>
@@ -363,7 +421,7 @@ function Sidebar() {
                                     <Button variant="ghost" className="w-full justify-start" asChild>
                                         <Link to={link.link}>
                                             <span className='w-8 h-8'>{link.icon}</span>
-                                            <span className="hidden lg:inline">{link.label}</span>
+                                            {!compact && <span className="hidden lg:inline">{link.label}</span>}
                                         </Link>
                                     </Button>
                                 </>
@@ -373,8 +431,9 @@ function Sidebar() {
                 </nav>
                 <Button variant="ghost" className="w-full justify-start mt-auto" asChild>
                     <Link to='/' >
-                        <Menu className="mr-2 h-6 w-6" />
-                        <span className="hidden lg:inline">More</span>
+
+                        <span><Menu className="mr-2 h-6 w-6" /></span>
+                        {!compact && <span className="hidden lg:inline">More</span>}
                     </Link>
                 </Button>
             </aside>
@@ -435,3 +494,100 @@ function Sidebar() {
 }
 
 export default Sidebar;
+// <Dialog open={isOpen} onOpenChange={setIsOpen}>
+//     <DialogTrigger asChild>
+//         <div className="flex ml-4 cursor-pointer">
+//             <span>{link.icon}</span>
+//             {!compact && <span className="hidden lg:inline">{link.label}</span>}
+//         </div>
+//     </DialogTrigger>
+//     <DialogContent className="sm:max-w-[800px] h-auto">
+//         <DialogHeader>
+//             <DialogTitle>{step === 1 ? "Select Post" : "Confirm Submission"}</DialogTitle>
+//         </DialogHeader>
+//         {step === 1 ? (
+//             <div className="grid gap-4 py-4">
+//                 <div className="grid grid-cols-4 items-center gap-4">
+//                     <Input
+//                         id="image"
+//                         type="file"
+//                         accept="image/*,video/*"
+//                         onChange={handleMediaChange}
+//                         className="col-span-12"
+//                         name="media"
+//                         multiple // Allow multiple files
+//                     />
+//                 </div>
+//                 {filePreview && (
+//                     <Swiper
+//                         modules={[Navigation]}
+//                         navigation
+//                         spaceBetween={10}
+//                         slidesPerView={4}
+//                         className="w-full h-[100px] mt-2"
+//                     >
+//                         {filePreview.map((preview, index) => (
+//                             <SwiperSlide key={index}>
+//                                 <div className="relative w-full h-full">
+//                                     {preview.isImage ? (
+//                                         <img
+//                                             src={preview.url}
+//                                             alt="Selected"
+//                                             className="w-full h-full object-cover rounded-md"
+//                                             loading="lazy"
+//                                         />
+//                                     ) : (
+//                                         <video
+//                                             src={preview.url}
+//                                             controls
+//                                             className="w-full h-full object-cover rounded-md"
+//                                         />
+//                                     )}
+//                                     {/* Clear Icon */}
+//                                     <div
+//                                         onClick={() => clearFile(index)} // Remove specific file
+//                                         className="absolute right-2 top-2 p-2 bg-zinc-500/50 rounded-full"
+//                                     >
+//                                         <X className="dark:text-white rounded-full h-4 w-4 cursor-pointer" />
+//                                     </div>
+//                                 </div>
+//                             </SwiperSlide>
+//                         ))}
+//                     </Swiper>
+//                 )}
+//                 <Button onClick={handleNext} className="w-full">
+//                     Next
+//                 </Button>
+//             </div>
+//         ) : (
+//             <div className="grid gap-4 py-4">
+//                 {/* Caption Input */}
+//                 <div className="border p-4 rounded-lg">
+//                     <textarea
+//                         value={caption}
+//                         onChange={(e) => setCaption(e.target.value)}
+//                         placeholder="Write a caption..."
+//                         rows={4}
+//                         className="w-full border-none focus:outline-none resize-none"
+//                     />
+//                 </div>
+//                 {
+//                     getRes ?
+//                         <Button
+//                             disabled
+//                             type="submit"
+//                         >
+//                             <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+//                             Create Post
+//                         </Button>
+//                         :
+
+//                         <Button onClick={handleSubmit} className="w-full">
+//                             Create Post
+//                         </Button>
+//                 }
+
+//             </div>
+//         )}
+//     </DialogContent>
+// </Dialog>
