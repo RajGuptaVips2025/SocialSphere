@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Navigate, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const StoryUpload = () => {
   const [media, setMedia] = useState(null);
@@ -32,10 +33,11 @@ const StoryUpload = () => {
         navigate("/");
       }
       console.log("Story uploaded:", response);
+      toast.success("Story is successfully uploaded!");
     } catch (error) {
       console.error("Error uploading story:", error);
     }
-    finally{
+    finally {
       setUploadSuccess(false)
       setMedia(null)
     }
@@ -44,16 +46,16 @@ const StoryUpload = () => {
   return (
     <form onSubmit={handleStoryUpload}>
       <div className="flex gap-2">
-      <Input type="file" accept="image/*,video/*" onChange={handleFileChange} required className="w-56" />
-      {
-          !uploadSuccess?
-          <Button type="submit">
-          
-            Upload Story</Button>
-          :
-          <Button disabled type="submit">
-          <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-            Upload Story</Button>
+        <Input type="file" accept="image/*,video/*" onChange={handleFileChange} required className="w-56" />
+        {
+          !uploadSuccess ?
+            <Button type="submit">
+
+              Upload Story</Button>
+            :
+            <Button disabled type="submit">
+              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+              Upload Story</Button>
         }
 
       </div>

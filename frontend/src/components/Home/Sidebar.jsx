@@ -25,6 +25,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import { ReloadIcon } from '@radix-ui/react-icons';
+import { toast } from 'react-toastify';
 
 
 function Sidebar({ compact = false }) {
@@ -44,10 +45,11 @@ function Sidebar({ compact = false }) {
     const [step, setStep] = useState(1)
     const [selectedImage, setSelectedImage] = useState(null)
     const [file, setFile] = useState([]); // Array to store multiple files
+    console.log(file);
     const [getRes, setGetRes] = useState(false)
     const [filePreview, setFilePreview] = useState([]); // Array to store file previews
     const [wideView, setWideView] = useState({ isOpen: false, media: null });
-    console.log(wideView);
+    // console.log(wideView);
     const openWideView = (media) => {
         setWideView({
             isOpen: true,
@@ -113,14 +115,15 @@ function Sidebar({ compact = false }) {
             setIsOpen(false)
             setStep(1)
             setSelectedImage(null)
-            navigate(`/profile/${userDetails.username}`);
+            navigate(`/profile/${userDetails.username}/${response.data.newPost.caption}`);
+            toast.success('Posted Successfully!');
 
         } catch (error) {
             console.error('Error creating post:', error);
+            toast.error("Caption field cannot be empty!")
         } finally {
             setIsResOk(true);
             setGetRes(false)
-
         }
     };
 
@@ -147,13 +150,20 @@ function Sidebar({ compact = false }) {
         }
     };
 
+    // const handleNext = () => {
+    //     if (media.length == 0 || media.length <= 10) {
+    //         setStep(2)
+    //     } else {
+    //         alert("Please select image less then 10")
+    //     }
+    // }
     const handleNext = () => {
-        if (media.length <= 10) {
-            setStep(2)
+        if (file.length > 0 && file.length <= 10) {
+            setStep(2);
         } else {
-            alert("Please select image less then 10")
+            toast.error("Number of Media selected cannot be less than zero and more than 10.");
         }
-    }
+    };
     // console.log(media)
 
     const editor = useEditor({
@@ -188,7 +198,7 @@ function Sidebar({ compact = false }) {
 
     const smLinks = links.filter(link => ['Home', 'Search', 'Create', 'Reels', 'Profile'].includes(link.label));
 
-
+    // console.log(RTMNotification)
     return (
         <>
             <aside
@@ -231,7 +241,7 @@ function Sidebar({ compact = false }) {
                                                                 </Avatar>
                                                                 <div className="flex flex-col items-start">
                                                                     <p className="font-medium text-sm">{user.username}</p>
-                                                                    <p className="text-sm text-gray-500">Liked your post</p>
+                                                                    <p className="text-sm text-gray-500">{user?.followType ? "Start Following" : "Liked your post"}</p>
                                                                 </div>
                                                             </Link>
                                                         </div>
@@ -379,21 +389,6 @@ function Sidebar({ compact = false }) {
                                             <DialogHeader>
                                                 <DialogTitle>Media Preview</DialogTitle>
                                             </DialogHeader>
-                                            {/* <div className="w-full h-full flex justify-center items-center">
-                                                {wideView?.media?.isImage ? (
-                                                    <img
-                                                        src={wideView?.media?.url}
-                                                        alt="Preview"
-                                                        className="max-w-full max-h-[80vh] object-contain rounded-md"
-                                                    />
-                                                ) : (
-                                                    <video
-                                                        src={wideView?.media?.url}
-                                                        controls
-                                                        className="max-w-full max-h-[80vh] object-contain rounded-md"
-                                                    />
-                                                )}
-                                            </div> */}
                                             <div className="w-full h-full flex justify-center items-center">
                                                 {wideView?.media ? (
                                                     wideView.media.isImage ? (
@@ -494,100 +489,3 @@ function Sidebar({ compact = false }) {
 }
 
 export default Sidebar;
-// <Dialog open={isOpen} onOpenChange={setIsOpen}>
-//     <DialogTrigger asChild>
-//         <div className="flex ml-4 cursor-pointer">
-//             <span>{link.icon}</span>
-//             {!compact && <span className="hidden lg:inline">{link.label}</span>}
-//         </div>
-//     </DialogTrigger>
-//     <DialogContent className="sm:max-w-[800px] h-auto">
-//         <DialogHeader>
-//             <DialogTitle>{step === 1 ? "Select Post" : "Confirm Submission"}</DialogTitle>
-//         </DialogHeader>
-//         {step === 1 ? (
-//             <div className="grid gap-4 py-4">
-//                 <div className="grid grid-cols-4 items-center gap-4">
-//                     <Input
-//                         id="image"
-//                         type="file"
-//                         accept="image/*,video/*"
-//                         onChange={handleMediaChange}
-//                         className="col-span-12"
-//                         name="media"
-//                         multiple // Allow multiple files
-//                     />
-//                 </div>
-//                 {filePreview && (
-//                     <Swiper
-//                         modules={[Navigation]}
-//                         navigation
-//                         spaceBetween={10}
-//                         slidesPerView={4}
-//                         className="w-full h-[100px] mt-2"
-//                     >
-//                         {filePreview.map((preview, index) => (
-//                             <SwiperSlide key={index}>
-//                                 <div className="relative w-full h-full">
-//                                     {preview.isImage ? (
-//                                         <img
-//                                             src={preview.url}
-//                                             alt="Selected"
-//                                             className="w-full h-full object-cover rounded-md"
-//                                             loading="lazy"
-//                                         />
-//                                     ) : (
-//                                         <video
-//                                             src={preview.url}
-//                                             controls
-//                                             className="w-full h-full object-cover rounded-md"
-//                                         />
-//                                     )}
-//                                     {/* Clear Icon */}
-//                                     <div
-//                                         onClick={() => clearFile(index)} // Remove specific file
-//                                         className="absolute right-2 top-2 p-2 bg-zinc-500/50 rounded-full"
-//                                     >
-//                                         <X className="dark:text-white rounded-full h-4 w-4 cursor-pointer" />
-//                                     </div>
-//                                 </div>
-//                             </SwiperSlide>
-//                         ))}
-//                     </Swiper>
-//                 )}
-//                 <Button onClick={handleNext} className="w-full">
-//                     Next
-//                 </Button>
-//             </div>
-//         ) : (
-//             <div className="grid gap-4 py-4">
-//                 {/* Caption Input */}
-//                 <div className="border p-4 rounded-lg">
-//                     <textarea
-//                         value={caption}
-//                         onChange={(e) => setCaption(e.target.value)}
-//                         placeholder="Write a caption..."
-//                         rows={4}
-//                         className="w-full border-none focus:outline-none resize-none"
-//                     />
-//                 </div>
-//                 {
-//                     getRes ?
-//                         <Button
-//                             disabled
-//                             type="submit"
-//                         >
-//                             <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-//                             Create Post
-//                         </Button>
-//                         :
-
-//                         <Button onClick={handleSubmit} className="w-full">
-//                             Create Post
-//                         </Button>
-//                 }
-
-//             </div>
-//         )}
-//     </DialogContent>
-// </Dialog>

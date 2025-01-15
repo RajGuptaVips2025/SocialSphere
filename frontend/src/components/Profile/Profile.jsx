@@ -14,6 +14,7 @@ import { IoChatbubbleSharp } from 'react-icons/io5';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import PostComment from '../Home/PostComment';
 import StoryUpload from '../StoryUpload';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -104,6 +105,7 @@ const Profile = () => {
     e.preventDefault()
     const response = await axios.delete(`/api/posts/delete/${postId}`);
     setPostsArr((prevPosts) => prevPosts.filter((post) => post?._id !== response?.data?.post?._id))
+    toast.info("Deleted Successfully!")
   }
 
   // Handle following/unfollowing users
