@@ -104,6 +104,8 @@ const like = async (req, res) => {
 
     await post.save();
 
+    console.log(post?.author?._id)
+
     const receiverSocketId = getReciverSocketId(post?.author?._id);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('rtmNotification', newObj);

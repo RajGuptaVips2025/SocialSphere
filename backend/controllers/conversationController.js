@@ -232,47 +232,11 @@ const getGroupMessages = async (req, res) => {
 };
 
 // Add a member to the group chat
-// const addMemberToGroup = async (req, res) => {
-//   try {
-//     // console.log("line 237 Group ID:", req.params.groupId);
-//     // console.log("line 238 Request body:", req.body);
-//     const groupId = req.params.groupId;
-//     const { userId } = req.body;
-
-//     const groupChat = await GroupChat.findById(groupId);
-//     if (!groupChat) {
-//       return res.status(404).json({ error: 'Group chat not found' });
-//     }
-
-//     // Check if the user is already in the group
-//     const isMember = groupChat.members.some(member => member.userId.toString() === userId);
-//     if (isMember) {
-//       return res.status(400).json({ error: 'User is already a member' });
-//     }
-
-//     groupChat.members.push({ userId });
-//     const groupMember = await User.findById(userId).select("username profilePicture");
-//     groupMember.role="member";
-//     console.log(groupMember);
-//     await groupChat.save();
-
-//     res.status(200).json({ success: true, message: 'Member added successfully', newUser: groupMember});
-//   } catch (error) {
-//     console.error(error.message);
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
-
-
-
-
-
-// Add a member to the group chat
 const addMemberToGroup = async (req, res) => {
   try {
     const { groupId } = req.params;
     const { userId } = req.body;
-    console.log(userId);
+    // console.log(userId);
 
     // Validate inputs
     if (!groupId || !userId) {
