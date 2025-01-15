@@ -15,6 +15,7 @@ import Sidebar from "../Home/Sidebar"
 import { addUser } from "@/features/userDetail/userDetailsSlice"
 import { useDispatch } from "react-redux"
 import { ReloadIcon } from "@radix-ui/react-icons"
+import { toast } from "react-toastify"
 
 export function ProfileEdit() {
   const { id } = useParams();
@@ -49,10 +50,11 @@ export function ProfileEdit() {
         profilePic: profilePic
       }));
       navigate(`/profile/${username}`);
+      toast.info("Profile Edited Successfully!")
     } catch (error) {
       console.error('Error updating profile:', error.message);
-      if (error.response.statusText === "Unauthorized"||error.response?.status===403) navigate('/login')
-
+      if (error.response.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
+        toast.error("Unable to edit the Profile!")
     } finally {
       setIsResOk(true)
     }

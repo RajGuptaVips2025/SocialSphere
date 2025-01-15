@@ -23,7 +23,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 function ChatBox() {
     let suggestedUser = useSelector((state) => state.counter.suggestedUser);
     const [groupMembers, setGroupMembers] = useState([]);
-
+    const [isAdmin, setIsAdmin] = useState([]);
+    
+    console.log(groupMembers);
     // Fetch and set group members when `suggestedUser` changes
     useEffect(() => {
         const members =
@@ -33,8 +35,39 @@ function ChatBox() {
                 profilePic: member.userId.profilePicture || "/default-avatar.png",
                 role: member.role,
             })) || [];
+            const adminId = members.find((item) => item.role === "admin")?._id;
+                setIsAdmin(adminId);
         setGroupMembers(members);
     }, [suggestedUser]);
+
+
+
+
+    // const [groupMembers, setGroupMembers] = useState([]);
+    // const [isAdmin, setIsAdmin] = useState(null); // Store admin ID in state
+
+    // // Fetch and set group members when `suggestedUser` changes
+    // useEffect(() => {
+    //     const members =
+    //         suggestedUser?.members?.map((member) => ({
+    //             _id: member.userId._id,
+    //             username: member.userId.username,
+    //             profilePic: member.userId.profilePicture || "/default-avatar.png",
+    //             role: member.role,
+    //         })) || [];
+    //     setGroupMembers(members);
+
+    //     // Find admin ID and store in state
+    //     const adminId = members.find((item) => item.role === "admin")?._id;
+    //     setIsAdmin(adminId);
+    // }, [suggestedUser]);
+
+
+
+
+
+
+
     const userDetails = useSelector((state) => state.counter.userDetails);
     const messages = useSelector((state) => state.counter.messages);
     const [textMessage, setTextMessage] = useState('')
@@ -203,9 +236,9 @@ function ChatBox() {
                 const response = await axios.put(`/api/conversations/group/add/member/${groupId}`, { userId });
                 console.log(`Added user ${userId}:`, response.data);
                 setGroupMembers((prevGroupMembers) => [
-                    ...prevGroupMembers, 
+                    ...prevGroupMembers,
                     response.data.newUser
-                  ]);
+                ]);
             }
             setIsAddPeopleDialogOpen(false); // Close the dialog after success
             setSelected([]); // Clear the selected users
@@ -213,28 +246,28 @@ function ChatBox() {
             console.error("Failed to add members:", error);
             alert("An error occurred while adding members.");
         }
-    };    
+    };
 
     const handleRemoveMember = async (userId) => {
         try {
-          const groupId = suggestedUser._id; // Ensure this is the correct group ID
-      
-          // Send request to remove member
-          const response = await axios.put(`/api/conversations/group/remove/member/${groupId}`, {
-            userId,
-          });      
-          // Update state dynamically to remove the member from the list at runtime
-          setGroupMembers((prevMembers) => {
-            const updatedMembers = prevMembers.filter((member) => member._id != userId);
-            console.log("Updated members:", updatedMembers); // Log to ensure state is updating
-            return updatedMembers;
-          });
-      
+            const groupId = suggestedUser._id; // Ensure this is the correct group ID
+
+            // Send request to remove member
+            const response = await axios.put(`/api/conversations/group/remove/member/${groupId}`, {
+                userId,
+            });
+            // Update state dynamically to remove the member from the list at runtime
+            setGroupMembers((prevMembers) => {
+                const updatedMembers = prevMembers.filter((member) => member._id != userId);
+                console.log("Updated members:", updatedMembers); // Log to ensure state is updating
+                return updatedMembers;
+            });
+
         } catch (error) {
-          console.error(`Failed to remove user ${userId}:`, error);
-          alert(`An error occurred while removing the user with ID ${userId}.`);
+            console.error(`Failed to remove user ${userId}:`, error);
+            alert(`An error occurred while removing the user with ID ${userId}.`);
         }
-      };
+    };
     return (
         <>
             {/* <VideoCall userId={userDetails?.id} socketRef={socketRef} remoteUserId={suggestedUser?._id}  /> */}
@@ -302,7 +335,7 @@ function ChatBox() {
                                                         <div key={member._id} className="flex items-center justify-between">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                    src={member.profilePic || "/default-avatar.png"} // Fallback if `profilePic` is undefined
+                                                                    src={member.profilePic || "/default-avatar.png"}
                                                                     alt="Profile"
                                                                     className="w-10 h-10 rounded-full object-cover"
                                                                 />
@@ -311,8 +344,8 @@ function ChatBox() {
                                                                     <p className="text-sm text-gray-500">{member.role}</p>
                                                                 </div>
                                                             </div>
-                                                            {/* Three dots with Dropdown Menu */}
-                                                            {member.role === "member" && (
+                                                            {/* Three dots with Dropdown Menu - Visible only to the admin */}
+                                                            {userDetails.id === isAdmin && member.role === "member" && (
                                                                 <DropdownMenu className="cursor-pointer">
                                                                     <DropdownMenuTrigger asChild>
                                                                         <button className="text-gray-500 hover:text-gray-700">
@@ -354,6 +387,7 @@ function ChatBox() {
                                                         You won't be able to send or receive messages unless someone adds you back to the chat. No one will be notified that you left the chat.
                                                     </p>
                                                 </div>
+
                                             </div>
                                         ) : (
                                             <p className="text-sm text-gray-500">No members found.</p> // Fallback for empty members

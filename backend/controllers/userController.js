@@ -2,6 +2,7 @@ const User = require('../models/userSchema');
 const Post = require('../models/postSchema');
 const Story = require('../models/storySchema');
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary
+const { getReciverSocketId, io } = require('../socket/socket');
 
 
 const getUserAndPosts = async (req, res) => {
@@ -36,7 +37,7 @@ const getFollowing = async (req, res) => {
     }
   
     const followingUsers = [...user.following, user._id];
-    console.log(followingUsers);
+    // console.log(followingUsers);
     // Fetch stories of all users in the following list
     const stories = await Story.find({ user: { $in: followingUsers } })
       .populate("user", "username profilePicture") // Populate the username and profile picture
@@ -52,27 +53,103 @@ const getFollowing = async (req, res) => {
 };
 
 
+// const following = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.params.id).select('-password');
+//     const followingUser = await User.findById(req.body.followingID);
+//     let newObj = {};
+//     if (!user.following.includes(req.body.followingID)) {
+//       user.following.push(req.body.followingID);
+//       newObj = {
+//         followType: 'follow',
+//         id: user._id,
+//         username: user.username,
+//         userPic: user.profilePicture
+//       };
+//     } else {
+//       user.following.pull(req.body.followingID);
+//       newObj = {
+//         followType: 'unFollow',
+//         id: user._id,
+//         username: user.username,
+//         userPic: user.profilePicture
+//       };
+//     }
+//     if (!followingUser.followers.includes(req.params.id)) {
+//       followingUser.followers.push(req.params.id);
+//     } else {
+//       followingUser.followers.pull(req.params.id);
+//     }
+//     await user.save();
+//     await followingUser.save();
+    
+//     const receiverSocketId = getReciverSocketId(followingUser._id);
+    
+//     if (receiverSocketId) {
+//       io.to(receiverSocketId).emit('rtmNotification', newObj);
+//     } else {
+//       console.log('Receiver not connected to socket');
+//     }
+
+//     res.json(user);
+//   } catch (error) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
+
 const following = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
     const followingUser = await User.findById(req.body.followingID);
+
+    if (!user || !followingUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    let newObj = {};
     if (!user.following.includes(req.body.followingID)) {
       user.following.push(req.body.followingID);
+      newObj = {
+        followType: 'follow',
+        id: user._id,
+        username: user.username,
+        userPic: user.profilePicture,
+      };
     } else {
       user.following.pull(req.body.followingID);
+      newObj = {
+        followType: 'unFollow',
+        id: user._id,
+        username: user.username,
+        userPic: user.profilePicture,
+      };
     }
+
     if (!followingUser.followers.includes(req.params.id)) {
       followingUser.followers.push(req.params.id);
     } else {
       followingUser.followers.pull(req.params.id);
     }
-    await user.save();
-    await followingUser.save();
+
+    await Promise.all([user.save(), followingUser.save()]);
+
     res.json(user);
+
+    const receiverSocketId = getReciverSocketId(followingUser._id);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('rtmNotification', newObj);
+    } else {
+      console.log('Receiver not connected to socket');
+    }
   } catch (error) {
+    console.error('Error in following/unfollowing:', error.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+
+
 
 
 const updateProfile = async (req, res) => {
@@ -154,7 +231,7 @@ const getUserDashboard = async (req, res) => {
 
     // Fetch all reels (posts) by this user
     const reels = await Post.find({ author: user._id });
-    console.log(reels);
+    // console.log(reels);
 
     // Initialize arrays for likes, comments, and views IDs
     const totalLikes = [];
