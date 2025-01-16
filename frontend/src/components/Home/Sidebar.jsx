@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BiSolidMoviePlay } from "react-icons/bi";
 import { FiSend } from "react-icons/fi";
 import { CiSquarePlus } from "react-icons/ci";
@@ -39,7 +39,6 @@ function Sidebar({ compact = false }) {
     const [results, setResults] = useState([]);
     RTMNotification = Object.values(RTMNotification);
     const [caption, setCaption] = useState('');
-    const [media, setMedia] = useState([]); // Update to handle multiple files (images or videos)
     const [isResOk, setIsResOk] = useState(true);
     const [isOpen, setIsOpen] = useState(false)
     const [step, setStep] = useState(1)
@@ -49,14 +48,91 @@ function Sidebar({ compact = false }) {
     const [getRes, setGetRes] = useState(false)
     const [filePreview, setFilePreview] = useState([]); // Array to store file previews
     const [wideView, setWideView] = useState({ isOpen: false, media: null });
-    // console.log(wideView);
+
+
+    const [selectedOption, setSelectedOption] = useState(null);
+    const [storyMedia, setStoryMedia] = useState([]); // Change to an array to store multiple files
+    const [types, setTypes] = useState([]); // Store types (image/video) for each file
+    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [stories, setStories] = useState([]);
+
+    const handleOptionSelect = (option) => {
+        setSelectedOption(option);
+    };
+
+    const handleStoryFileChange = (e) => {
+        const files = Array.from(e.target.files); // Get all selected files
+        setStoryMedia(files);
+        setTypes(files.map((file) => file.type.startsWith("video") ? "video" : "image")); // Determine types
+    };
+
+
+    const clearStoryFile = (index) => {
+        // Remove the selected file
+        const updatedMedia = storyMedia.filter((_, i) => i !== index);
+        setStoryMedia(updatedMedia);
+
+        // Update the file input's value
+        const dataTransfer = new DataTransfer();
+        updatedMedia.forEach((file) => dataTransfer.items.add(file));
+        document.getElementById('story').files = dataTransfer.files;
+
+        // Optional: Update types if needed
+        const updatedTypes = types.filter((_, i) => i !== index);
+        setTypes(updatedTypes);
+    };
+
+    const handleStoryUpload = async (e) => {
+        e.preventDefault();
+        setUploadSuccess(true);
+
+        const formData = new FormData();
+        storyMedia.forEach((file, index) => {
+            formData.append(`media`, file); // Append each file
+            formData.append(`type_${index}`, types[index]); // Append the type for each file
+        });
+
+        try {
+            const response = await axios.post("/api/story/uploadStory", formData, {
+                headers: { "Content-Type": "multipart/form-data" }
+            });
+            if (response.status === 200) {
+                const newStories = response.data.story.media; // Get all new stories
+                setStories((prevStories) => [...prevStories, ...newStories]); // Append to existing stories
+                toast.success("Stories are successfully uploaded!");
+            }
+        } catch (error) {
+            console.error("Error uploading stories:", error);
+            toast.error("Failed to upload stories.");
+        } finally {
+            setUploadSuccess(false);
+            setStoryMedia([]); // Clear the selected files
+        }
+    };
+
+    const fetchStories = async () => {
+        try {
+            const response = await axios.get(`/api/story/getStories/${userDetails.id}`); // Replace `userId` with actual user ID logic
+            if (response.status === 200) {
+                setStories(response.data.story.media || []);
+            } else {
+                console.error("Failed to fetch stories: ", response);
+            }
+        } catch (error) {
+            console.error("Error fetching stories:", error.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchStories();
+    }, [uploadSuccess]);
+
     const openWideView = (media) => {
         setWideView({
             isOpen: true,
             media, // Set the media object here
         });
     };
-
 
     const handleMediaChange = (event) => {
         const files = Array.from(event.target.files);
@@ -150,13 +226,6 @@ function Sidebar({ compact = false }) {
         }
     };
 
-    // const handleNext = () => {
-    //     if (media.length == 0 || media.length <= 10) {
-    //         setStep(2)
-    //     } else {
-    //         alert("Please select image less then 10")
-    //     }
-    // }
     const handleNext = () => {
         if (file.length > 0 && file.length <= 10) {
             setStep(2);
@@ -164,16 +233,6 @@ function Sidebar({ compact = false }) {
             toast.error("Number of Media selected cannot be less than zero and more than 10.");
         }
     };
-    // console.log(media)
-
-    const editor = useEditor({
-        extensions: [StarterKit],
-        content: caption,
-        onUpdate: ({ editor }) => {
-            setCaption(editor.getHTML()); // Update caption as HTML when the editor content changes
-        },
-    });
-
 
     const links = [
         { id: 1, icon: <Home className="mr-2 h-6 w-6" />, label: "Home", link: '/' },
@@ -298,114 +357,228 @@ function Sidebar({ compact = false }) {
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[800px] h-auto">
                                             <DialogHeader>
-                                                <DialogTitle>{step === 1 ? "Select Post" : "Confirm Submission"}</DialogTitle>
+                                                <DialogTitle>Select an Option</DialogTitle>
                                             </DialogHeader>
-                                            {step === 1 ? (
-                                                <div className="grid gap-4 py-4">
-                                                    <div className="grid grid-cols-4 items-center gap-4">
-                                                        <Input
-                                                            id="image"
-                                                            type="file"
-                                                            accept="image/*,video/*"
-                                                            onChange={handleMediaChange}
-                                                            className="col-span-12"
-                                                            name="media"
-                                                            multiple // Allow multiple files
-                                                        />
+                                            <div className="grid gap-4 py-4">
+                                                {!selectedOption ? (
+                                                    // Dropdown options for post and story
+                                                    <div className="grid gap-2">
+                                                        <Button onClick={() => handleOptionSelect('post')}>Create Post</Button>
+                                                        <Button onClick={() => handleOptionSelect('story')}>Upload Story</Button>
                                                     </div>
-                                                    {filePreview && (
-                                                        <Swiper
-                                                            modules={[Navigation]}
-                                                            navigation
-                                                            spaceBetween={10}
-                                                            slidesPerView={4}
-                                                            className="w-full h-[100px] mt-2"
-                                                        >
-                                                            {filePreview.map((preview, index) => (
-                                                                <SwiperSlide key={index}>
-                                                                    <div className="relative w-full h-full">
-                                                                        {preview.isImage ? (
-                                                                            <img
-                                                                                src={preview.url}
-                                                                                alt="Selected"
-                                                                                className="w-full h-full object-cover rounded-md cursor-pointer"
-                                                                                onClick={() => openWideView(preview)} // Open wide view
-                                                                                loading="lazy"
-                                                                            />
-                                                                        ) : (
-                                                                            <video
-                                                                                src={preview.url}
-                                                                                controls
-                                                                                className="w-full h-full object-cover rounded-md cursor-pointer"
-                                                                                onClick={() => openWideView(preview)} // Open wide view
-                                                                            />
-                                                                        )}
-                                                                        {/* Clear Icon */}
-                                                                        <div
-                                                                            onClick={() => clearFile(index)} // Remove specific file
-                                                                            className="absolute right-2 top-2 p-2 bg-zinc-500/50 rounded-full"
-                                                                        >
-                                                                            <X className="dark:text-white rounded-full h-4 w-4 cursor-pointer" />
-                                                                        </div>
+                                                ) : selectedOption === 'post' ? (
+                                                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                                                        <DialogTrigger asChild>
+                                                            <div className="flex ml-4 cursor-pointer">
+                                                                <span>{link.icon}</span>
+                                                                {!compact && <span className="hidden lg:inline">{link.label}</span>}
+                                                            </div>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="sm:max-w-[800px] h-auto">
+                                                            <DialogHeader>
+                                                                <DialogTitle>{step === 1 ? "Select Post" : "Confirm Submission"}</DialogTitle>
+                                                            </DialogHeader>
+                                                            {step === 1 ? (
+                                                                <div className="grid gap-4 py-4">
+                                                                    <div className="grid grid-cols-4 items-center gap-4">
+                                                                        <Input
+                                                                            id="image"
+                                                                            type="file"
+                                                                            accept="image/*,video/*"
+                                                                            onChange={handleMediaChange}
+                                                                            className="col-span-12"
+                                                                            name="media"
+                                                                            multiple // Allow multiple files
+                                                                        />
                                                                     </div>
-                                                                </SwiperSlide>
-                                                            ))}
-                                                        </Swiper>
-                                                    )}
-                                                    <Button onClick={handleNext} className="w-full">
-                                                        Next
-                                                    </Button>
-                                                </div>
-                                            ) : (
-                                                <div className="grid gap-4 py-4">
-                                                    {/* Caption Input */}
-                                                    <div className="border p-4 rounded-lg">
-                                                        <textarea
-                                                            value={caption}
-                                                            onChange={(e) => setCaption(e.target.value)}
-                                                            placeholder="Write a caption..."
-                                                            rows={4}
-                                                            className="w-full border-none focus:outline-none resize-none"
-                                                        />
-                                                    </div>
-                                                    {getRes ? (
-                                                        <Button disabled type="submit">
-                                                            <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                                                            Create Post
-                                                        </Button>
-                                                    ) : (
-                                                        <Button onClick={handleSubmit} className="w-full">
-                                                            Create Post
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </DialogContent>
-                                    </Dialog>
-
-                                    {/* Dialog for wide view */}
-                                    <Dialog open={wideView.isOpen} onOpenChange={() => setWideView({ ...wideView, isOpen: false })}>
-                                        <DialogContent className="sm:max-w-[800px] h-auto">
-                                            <DialogHeader>
-                                                <DialogTitle>Media Preview</DialogTitle>
-                                            </DialogHeader>
-                                            <div className="w-full h-full flex justify-center items-center">
-                                                {wideView?.media ? (
-                                                    wideView.media.isImage ? (
-                                                        <img
-                                                            src={wideView.media.url}
-                                                            alt="Preview"
-                                                            className="max-w-full max-h-[80vh] object-contain rounded-md"
-                                                        />
-                                                    ) : (
-                                                        <video
-                                                            src={wideView.media.url}
-                                                            controls
-                                                            className="max-w-full max-h-[80vh] object-contain rounded-md"
-                                                        />
-                                                    )
+                                                                    {filePreview && (
+                                                                        <Swiper
+                                                                            modules={[Navigation]}
+                                                                            navigation
+                                                                            spaceBetween={10}
+                                                                            slidesPerView={4}
+                                                                            className="w-full h-[100px] mt-2"
+                                                                        >
+                                                                            {filePreview.map((preview, index) => (
+                                                                                <SwiperSlide key={index}>
+                                                                                    <div className="relative w-full h-full">
+                                                                                        {preview.isImage ? (
+                                                                                            <img
+                                                                                                src={preview.url}
+                                                                                                alt="Selected"
+                                                                                                className="w-full h-full object-cover rounded-md cursor-pointer"
+                                                                                                onClick={() => openWideView(preview)} // Open wide view
+                                                                                                loading="lazy"
+                                                                                            />
+                                                                                        ) : (
+                                                                                            <video
+                                                                                                src={preview.url}
+                                                                                                controls
+                                                                                                className="w-full h-full object-cover rounded-md cursor-pointer"
+                                                                                                onClick={() => openWideView(preview)} // Open wide view
+                                                                                            />
+                                                                                        )}
+                                                                                        {/* Clear Icon */}
+                                                                                        <div
+                                                                                            onClick={() => clearFile(index)} // Remove specific file
+                                                                                            className="absolute right-2 top-2 p-2 bg-zinc-500/50 rounded-full"
+                                                                                        >
+                                                                                            <X className="dark:text-white rounded-full h-4 w-4 cursor-pointer" />
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </SwiperSlide>
+                                                                            ))}
+                                                                        </Swiper>
+                                                                    )}
+                                                                    <Button onClick={handleNext} className="w-full">
+                                                                        Next
+                                                                    </Button>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="grid gap-4 py-4">
+                                                                    {/* Caption Input */}
+                                                                    <div className="border p-4 rounded-lg">
+                                                                        <textarea
+                                                                            value={caption}
+                                                                            onChange={(e) => setCaption(e.target.value)}
+                                                                            placeholder="Write a caption..."
+                                                                            rows={4}
+                                                                            className="w-full border-none focus:outline-none resize-none"
+                                                                        />
+                                                                    </div>
+                                                                    {getRes ? (
+                                                                        <Button disabled type="submit">
+                                                                            <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                                                            Create Post
+                                                                        </Button>
+                                                                    ) : (
+                                                                        <Button onClick={handleSubmit} className="w-full">
+                                                                            Create Post
+                                                                        </Button>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 ) : (
-                                                    <p>No media available for preview.</p>
+                                                    // Upload Story process
+                                                    // <div className="grid gap-4 py-4">
+                                                    //     <div className="grid grid-cols-4 items-center gap-4">
+                                                    //         <Input
+                                                    //             id="story"
+                                                    //             type="file"
+                                                    //             accept="image/*,video/*"
+                                                    //             onChange={handleStoryFileChange}
+                                                    //             className="col-span-12"
+                                                    //             name="media"
+                                                    //             multiple // Enable multiple file selection
+                                                    //         />
+                                                    //         {storyMedia.length > 0 && (
+                                                    //             <div className="grid grid-cols-3 gap-4 mt-4">
+                                                    //                 {storyMedia.map((file, index) => (
+                                                    //                     <div key={index} className="w-full">
+                                                    //                         {types[index] === "image" ? (
+                                                    //                             <img
+                                                    //                                 src={URL.createObjectURL(file)}
+                                                    //                                 alt={`Story Preview ${index + 1}`}
+                                                    //                                 className="w-full object-contain rounded-md"
+                                                    //                             />
+                                                    //                         ) : (
+                                                    //                             <video
+                                                    //                                 src={URL.createObjectURL(file)}
+                                                    //                                 controls
+                                                    //                                 className="w-full object-contain rounded-md"
+                                                    //                             />
+                                                    //                         )}
+                                                    //                     </div>
+                                                    //                 ))}
+                                                    //             </div>
+                                                    //         )}
+
+                                                    //     </div>
+                                                    //     <div className="mt-auto">
+                                                    //         {uploadSuccess ? (
+                                                    //             <Button disabled className="w-full">
+                                                    //                 <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                                    //                 Uploading...
+                                                    //             </Button>
+                                                    //         ) : (
+                                                    //             <Button onClick={handleStoryUpload} className="w-full">
+                                                    //                 Upload Story
+                                                    //             </Button>
+                                                    //         )}
+                                                    //     </div>
+                                                    // </div>
+                                                    <div className="grid gap-4 py-4">
+                                                        {/* File Input */}
+                                                        <div className="grid grid-cols-4 items-center gap-4">
+                                                            <Input
+                                                                id="story"
+                                                                type="file"
+                                                                accept="image/*,video/*"
+                                                                onChange={handleStoryFileChange}
+                                                                className="col-span-12"
+                                                                name="media"
+                                                                multiple // Enable multiple file selection
+                                                            />
+                                                        </div>
+
+                                                        {/* Media Preview */}
+                                                        {storyMedia.length > 0 && (
+                                                            <Swiper
+                                                                modules={[Navigation]}
+                                                                navigation
+                                                                spaceBetween={10}
+                                                                slidesPerView={3}
+                                                                className="w-full h-[120px] mt-2"
+                                                            >
+                                                                {storyMedia.map((file, index) => (
+                                                                    <SwiperSlide key={index}>
+                                                                        <div className="relative w-full h-full">
+                                                                            {types[index] === "image" ? (
+                                                                                <img
+                                                                                    src={URL.createObjectURL(file)}
+                                                                                    alt={`Story Preview ${index + 1}`}
+                                                                                    className="w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                                                                                    onClick={() => openWideView(file)} // Open wide view
+                                                                                    loading="lazy"
+                                                                                />
+                                                                            ) : (
+                                                                                <video
+                                                                                    src={URL.createObjectURL(file)}
+                                                                                    controls
+                                                                                    className="w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                                                                                    onClick={() => openWideView(file)} // Open wide view
+                                                                                />
+                                                                            )}
+                                                                            {/* Clear Icon */}
+                                                                            <div
+                                                                                onClick={() => clearStoryFile(index)} // Remove specific file
+                                                                                className="absolute right-2 top-2 p-2 bg-zinc-500/50 rounded-full"
+                                                                            >
+                                                                                <X className="dark:text-white rounded-full h-4 w-4 cursor-pointer" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </SwiperSlide>
+                                                                ))}
+                                                            </Swiper>
+                                                        )}
+
+                                                        {/* Upload Button */}
+                                                        <div className="mt-auto">
+                                                            {uploadSuccess ? (
+                                                                <Button disabled className="w-full flex items-center justify-center gap-2">
+                                                                    <ReloadIcon className="h-4 w-4 animate-spin" />
+                                                                    Uploading...
+                                                                </Button>
+                                                            ) : (
+                                                                <Button onClick={handleStoryUpload} className="w-full">
+                                                                    Upload Story
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
                                                 )}
                                             </div>
                                         </DialogContent>
