@@ -1,5 +1,5 @@
-# backend/uploads/*.mp4 filter=lfs diff=lfs merge=lfs -text
-# *.mp4 filter=lfs diff=lfs merge=lfs -text
+backend/uploads/*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
 
 
 # Apply Git LFS to all common image file types globally
