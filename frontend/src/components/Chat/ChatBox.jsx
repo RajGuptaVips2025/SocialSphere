@@ -22,9 +22,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 function ChatBox() {
     let suggestedUser = useSelector((state) => state.counter.suggestedUser);
+    console.log(suggestedUser);
     const [groupMembers, setGroupMembers] = useState([]);
     const [isAdmin, setIsAdmin] = useState([]);
-    
+
     console.log(groupMembers);
     // Fetch and set group members when `suggestedUser` changes
     useEffect(() => {
@@ -35,39 +36,10 @@ function ChatBox() {
                 profilePic: member.userId.profilePicture || "/default-avatar.png",
                 role: member.role,
             })) || [];
-            const adminId = members.find((item) => item.role === "admin")?._id;
-                setIsAdmin(adminId);
+        const adminId = members.find((item) => item.role === "admin")?._id;
+        setIsAdmin(adminId);
         setGroupMembers(members);
     }, [suggestedUser]);
-
-
-
-
-    // const [groupMembers, setGroupMembers] = useState([]);
-    // const [isAdmin, setIsAdmin] = useState(null); // Store admin ID in state
-
-    // // Fetch and set group members when `suggestedUser` changes
-    // useEffect(() => {
-    //     const members =
-    //         suggestedUser?.members?.map((member) => ({
-    //             _id: member.userId._id,
-    //             username: member.userId.username,
-    //             profilePic: member.userId.profilePicture || "/default-avatar.png",
-    //             role: member.role,
-    //         })) || [];
-    //     setGroupMembers(members);
-
-    //     // Find admin ID and store in state
-    //     const adminId = members.find((item) => item.role === "admin")?._id;
-    //     setIsAdmin(adminId);
-    // }, [suggestedUser]);
-
-
-
-
-
-
-
     const userDetails = useSelector((state) => state.counter.userDetails);
     const messages = useSelector((state) => state.counter.messages);
     const [textMessage, setTextMessage] = useState('')
@@ -278,7 +250,7 @@ function ChatBox() {
                         <div className="flex items-center space-x-3">
                             <span onClick={removeSuggestedUser} className='text-3xl inline-block md:hidden'>←</span>
                             <Avatar>
-                                <AvatarImage className="object-cover object-top" src={suggestedUser?.profilePicture} />
+                                <AvatarImage className="object-cover object-top" src={suggestedUser?.profilePicture || 'http://localhost:5173/uploads/profilePicture.jpg'} />
                                 <AvatarFallback>{suggestedUser && 'groupName' in suggestedUser ? suggestedUser?.groupName : suggestedUser?.username}</AvatarFallback>
                             </Avatar>
                             <div>
@@ -335,7 +307,7 @@ function ChatBox() {
                                                         <div key={member._id} className="flex items-center justify-between">
                                                             <div className="flex items-center space-x-3">
                                                                 <img
-                                                                    src={member.profilePic || "/default-avatar.png"}
+                                                                    src={member.profilePic || "/uploads/profilePicture.jpg"}
                                                                     alt="Profile"
                                                                     className="w-10 h-10 rounded-full object-cover"
                                                                 />
@@ -461,7 +433,7 @@ function ChatBox() {
                                                                     <div className="flex items-center space-x-4">
                                                                         <Avatar>
                                                                             <AvatarImage
-                                                                                src={user.profilePicture || "/default-profile.png"}
+                                                                                src={user.profilePicture || "/profilePic.jpeg"}
                                                                                 alt={user.username}
                                                                                 className="object-cover"
                                                                             />

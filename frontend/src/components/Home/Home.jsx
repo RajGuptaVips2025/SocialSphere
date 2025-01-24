@@ -170,16 +170,19 @@ const Home = ({ socketRef }) => {
   }, []); // Only run once on mount
 
   useEffect(() => {
-    socketRef.current.on('rtmNotification', (rtmNotification) => {
-      {
-        rtmNotification.id !== userDetails?.id &&
-        dispatch(setRtmNotification(rtmNotification))
-      }
-    });
-    return () => {
-      socketRef.current.off('rtmNotification');
-    };
-  }, []); // Empty dependency array to ensure the listener is added only once
+    if (socketRef?.current) {
+      socketRef.current.on('rtmNotification', (rtmNotification) => {
+        if (rtmNotification.id !== userDetails?.id) {
+          dispatch(setRtmNotification(rtmNotification));
+        }
+      });
+
+      return () => {
+        socketRef.current.off('rtmNotification');
+      };
+    }
+  }, [socketRef, userDetails, dispatch]);
+
 
   return (<div className='dark:bg-neutral-950 dark:text-white'>
     <div className="flex bg-white dark:bg-neutral-950 min-h-screen">

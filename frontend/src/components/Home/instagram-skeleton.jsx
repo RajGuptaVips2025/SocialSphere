@@ -6,14 +6,6 @@ export function InstagramSkeletonComponent() {
   return (
     (<div className="max-w-lg mx-auto dark:bg-neutral-950">
       {/* Header */}
-      {/* <div className="flex space-x-4 p-4 overflow-x-auto">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="flex flex-col items-center space-y-1">
-            <Skeleton className="h-16 w-16 rounded-full" />
-            <Skeleton className="h-3 w-20" />
-          </div>
-        ))}
-      </div> */}
       {/* Posts */}
       {[...Array(2)].map((_, i) => (
         <div key={i} className=" pb-4 mb-4">

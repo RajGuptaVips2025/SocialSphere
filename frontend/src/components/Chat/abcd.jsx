@@ -130,13 +130,9 @@ function ChatBox() {
                             <Button variant="ghost" size="sm" className="text-black dark:text-white">
                                 <Phone className="h-6 w-6" />
                             </Button>
-                            {/* <Button onClick={()=>startCall(suggestedUser?._id)} variant="ghost" size="sm" className="text-black dark:text-white"> */}
                             <Button onClick={() => navigate(`/call/${suggestedUser?._id}`)} variant="ghost" size="sm" className="text-black dark:text-white">
                                 <Video className="h-7 w-7" />
                             </Button>
-                            {/* <Button variant="ghost" size="sm" className="text-black dark:text-white">
-                                <Info className="h-6 w-6" />
-                            </Button> */}
                             <Button
                                 onClick={() => setIsGroupDetailsOpen(true)} // Open group details on Info click
                                 variant="ghost"

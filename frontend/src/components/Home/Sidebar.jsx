@@ -461,54 +461,6 @@ function Sidebar({ compact = false }) {
                                                         </DialogContent>
                                                     </Dialog>
                                                 ) : (
-                                                    // Upload Story process
-                                                    // <div className="grid gap-4 py-4">
-                                                    //     <div className="grid grid-cols-4 items-center gap-4">
-                                                    //         <Input
-                                                    //             id="story"
-                                                    //             type="file"
-                                                    //             accept="image/*,video/*"
-                                                    //             onChange={handleStoryFileChange}
-                                                    //             className="col-span-12"
-                                                    //             name="media"
-                                                    //             multiple // Enable multiple file selection
-                                                    //         />
-                                                    //         {storyMedia.length > 0 && (
-                                                    //             <div className="grid grid-cols-3 gap-4 mt-4">
-                                                    //                 {storyMedia.map((file, index) => (
-                                                    //                     <div key={index} className="w-full">
-                                                    //                         {types[index] === "image" ? (
-                                                    //                             <img
-                                                    //                                 src={URL.createObjectURL(file)}
-                                                    //                                 alt={`Story Preview ${index + 1}`}
-                                                    //                                 className="w-full object-contain rounded-md"
-                                                    //                             />
-                                                    //                         ) : (
-                                                    //                             <video
-                                                    //                                 src={URL.createObjectURL(file)}
-                                                    //                                 controls
-                                                    //                                 className="w-full object-contain rounded-md"
-                                                    //                             />
-                                                    //                         )}
-                                                    //                     </div>
-                                                    //                 ))}
-                                                    //             </div>
-                                                    //         )}
-
-                                                    //     </div>
-                                                    //     <div className="mt-auto">
-                                                    //         {uploadSuccess ? (
-                                                    //             <Button disabled className="w-full">
-                                                    //                 <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                                                    //                 Uploading...
-                                                    //             </Button>
-                                                    //         ) : (
-                                                    //             <Button onClick={handleStoryUpload} className="w-full">
-                                                    //                 Upload Story
-                                                    //             </Button>
-                                                    //         )}
-                                                    //     </div>
-                                                    // </div>
                                                     <div className="grid gap-4 py-4">
                                                         {/* File Input */}
                                                         <div className="grid grid-cols-4 items-center gap-4">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { FaInstagram, FaRegEdit, FaRegHeart } from "react-icons/fa"
 import MessagesMember from "./MessagesMember"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { GoHomeFill } from "react-icons/go"
 import { IoSearchOutline } from "react-icons/io5"
 import { MdOutlineExplore } from "react-icons/md"
@@ -37,7 +37,6 @@ export function ChatComponent({ socketRef }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-
   const getFollowingUsers = async (username) => {
     try {
       const response = await axios.get(`/api/conversations/followingUsers/${username}`);
@@ -47,37 +46,38 @@ export function ChatComponent({ socketRef }) {
       return response.data;
     } catch (error) {
       console.error('Error fetching following users:', error);
-      if (error.response.statusText === "Unauthorized"||error.response?.status===403) navigate('/login')
+      if (error.response.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
 
     }
   };
 
 
-
   const getRealTimeMessages = () => {
-    socketRef.current.on('newMessage', (newMessage) => {
-      Array.isArray(messages) ?
-        dispatch(setMessages([...messages, newMessage])) : "no"
-    });
-    socketRef.current.on('sendGroupMessage', (newMessage) => {
-      Array.isArray(messages) ?
-        dispatch(setMessages([...messages, newMessage])) : "no"
-    });
-    
+    if (socketRef.current) {
+      socketRef.current.on('newMessage', (newMessage) => {
+        Array.isArray(messages) ?
+          dispatch(setMessages([...messages, newMessage])) : "no";
+      });
+
+      socketRef.current.on('sendGroupMessage', (newMessage) => {
+        Array.isArray(messages) ?
+          dispatch(setMessages([...messages, newMessage])) : "no";
+      });
+    } else {
+      console.error('Socket not initialized');
+    }
   }
 
-
-
   useEffect(() => {
-
-    getRealTimeMessages()
+    getRealTimeMessages();
 
     return () => {
-      socketRef.current.off('newMessage')
-    }
-  }, [messages, setMessages])
-
-
+      if (socketRef.current) {
+        socketRef.current.off('newMessage');
+        socketRef.current.off('sendGroupMessage');
+      }
+    };
+  }, [messages]);  // Depend on messages if necessary
 
   useEffect(() => {
     if (userDetails?.username) {
@@ -89,19 +89,10 @@ export function ChatComponent({ socketRef }) {
     }
   }, [userDetails, setMessages]);
 
-
-
   useEffect(() => {
     if (userDetails?.id) {
       gettAllMessages();
     }
-
-
-    // socketRef.current.on('videoCallOffer', async ({ from, offer }) => {
-    //   if (offer.type == 'offer') {
-    //     navigate(`/call/${from}`); // Navigate to the correct call route
-    //   }
-    // });
   }, [userDetails, suggestedUser]);
 
 
@@ -127,7 +118,7 @@ export function ChatComponent({ socketRef }) {
       }
     } catch (error) {
       console.log(error.message);
-      if (error?.response?.statusText === "Unauthorized"||error.response?.status===403) navigate('/login')
+      if (error?.response?.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
 
     }
   };
@@ -137,17 +128,17 @@ export function ChatComponent({ socketRef }) {
     (<div className="flex h-screen">
       <div className="flex-1 flex dark:bg-neutral-950 dark:text-white">
         {/* Sidebar */}
-        
-        <Sidebar compact/>
+
+        <Sidebar compact />
         <div
-          className={` ${suggestedUser?"w-0":'w-full'} ml-20  md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}>
+          className={` ${suggestedUser ? "w-0" : 'w-full'} ml-20  md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}>
           <div
             className="p-4 border-gray-200 dark:border-zinc-800 dark:bg-neutral-950 dark:text-white flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <span className="font-semibold flex items-center gap-2 cursor-pointer dark:bg-neutral-950 dark:text-white">{userDetails.username} <IoIosArrowDown/></span>
+              <span className="font-semibold flex items-center gap-2 cursor-pointer dark:bg-neutral-950 dark:text-white">{userDetails.username} <IoIosArrowDown /></span>
             </div>
             <div className="flex space-x-2">
-            <SearchDialogWithCheckboxesComponent socketRef={socketRef} />
+              <SearchDialogWithCheckboxesComponent socketRef={socketRef} />
 
             </div>
           </div>
@@ -160,7 +151,7 @@ export function ChatComponent({ socketRef }) {
         </div>
 
         {/* Main Chat Area */}
-        <ChatBox socketRef={socketRef}/>
+        <ChatBox socketRef={socketRef} />
       </div>
     </div>)
   );

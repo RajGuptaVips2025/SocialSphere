@@ -65,19 +65,6 @@ export const userDetailsSlice = createSlice({
     setWatchHistory: (state, action) => {
       state.watchHistory = action.payload;
     },
-    // setRtmNotification: (state, action) => {
-    //   if(action.payload.likeType==='like'){
-    //     // state.rtmNotification.push(action.payload);
-    //     state.rtmNotification=Object.values(state.rtmNotification)
-    //     state.rtmNotification = [];
-
-    //   }else if(action.payload.likeType==='dislike'){
-
-    //     state.rtmNotification=Object.values(state.rtmNotification)
-    //     state.rtmNotification=state.rtmNotification.filter((item)=>item.id!==action.payload.id)
-
-    //   }
-    // },
     setRtmNotification: (state, action) => {
       state.rtmNotification = Object.values(state.rtmNotification); // Ensure it's an array
 

@@ -7,7 +7,7 @@ const groupChatSchema = new mongoose.Schema({
     trim: true
   },
   groupImage: {
-    type: String, default: 'uploads/groupProfile.jpeg'   // URL or path to the group's image
+    type: String, default: 'uploads/profilePicture.jpeg'   // URL or path to the group's image
   },
   members: [
     {

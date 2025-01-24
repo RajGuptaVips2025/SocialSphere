@@ -45,12 +45,14 @@ export function SearchDialogWithCheckboxesComponent({ socketRef }) {
       }
     });
   };
-  
+
   useEffect(() => {
-    socketRef.current.on('groupCreated', ({ groupChat }) => {
-      const updatedFollowingUsers = [...arrOfFollowingUsers, groupChat];
-      dispatch(setFollowingUsers(updatedFollowingUsers));
-    });
+    if (socketRef.current) { // Check if socketRef.current is not null
+      socketRef.current.on('groupCreated', ({ groupChat }) => {
+        const updatedFollowingUsers = [...arrOfFollowingUsers, groupChat];
+        dispatch(setFollowingUsers(updatedFollowingUsers));
+      });
+    }
   }, [arrOfFollowingUsers, dispatch, socketRef]);
   
   const handleCreateGroup = async () => {
@@ -164,16 +166,3 @@ export function SearchDialogWithCheckboxesComponent({ socketRef }) {
     </Dialog>
   );
 }
-
-
-// const handleCheckboxChange = (id) => {
-//   setMembers(prev => {
-//     const memberExists = prev.some(item => item.userId === id);
-//     // console.log(memberExists);
-//     if (memberExists) {
-//       return prev.filter(item => item.userId !== id);
-//     } else {
-//       return [...prev, { userId: id }];
-//     }
-//   });
-// };

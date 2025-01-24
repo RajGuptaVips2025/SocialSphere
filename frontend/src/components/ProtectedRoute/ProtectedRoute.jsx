@@ -1,34 +1,70 @@
+import { Cookies } from 'react-cookie';
+import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  // const cookies = new Cookies();
+  const cookies = useMemo(() => new Cookies(), []);
+  console.log(cookies);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    cookies.get('isAuthenticated') || null
+  );
+
+  // console.log(isAuthenticated);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const checkAuth = async () => {
       try {
-        const res = await axios.get('/api/auth/isLoggedIn');
+        const res = await axios.get('/api/auth/isLoggedIn', {
+          signal: controller.signal,
+        });
+        
         if (res.status === 200) {
           setIsAuthenticated(true);
+          cookies.set('isAuthenticated', true, { path: '/' });
         }
       } catch (error) {
-        setIsAuthenticated(false);
-        console.log('Error during authentication check:', error.message);
+        if (error.name !== 'CanceledError') {
+          setIsAuthenticated(false);
+          cookies.set('isAuthenticated', false, { path: '/' });
+          console.log('Error during authentication check:', error.message);
+        }
       }
     };
 
-    checkAuth();
-  }, []);
+    if (isAuthenticated === null) {
+      checkAuth();
+    }
 
-  // While waiting for authentication check
-  if (isAuthenticated === null) return <div>Loading...</div>;
+    return () => {
+      controller.abort(); // Cleanup to prevent memory leaks
+    };
+  }, [isAuthenticated, cookies]);
 
-  // If authenticated, render the child components
-  if (isAuthenticated) return children;
+  // Display spinner while waiting for authentication check
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div
+          className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+          role="status"
+        >
+          <span className="sr-only">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
-  // If not authenticated, redirect to login
-  return <Navigate to="/login" />;
+  // Render children if authenticated
+  if (isAuthenticated) {
+    return children;
+  }
+
+  // Redirect to login if not authenticated
+  return <Navigate to="/login" replace />;
 };
 
 export default ProtectedRoute;

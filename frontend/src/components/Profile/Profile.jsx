@@ -158,6 +158,9 @@ const Profile = () => {
     window.addEventListener('scroll', handleScroll); // Attach scroll listener for pagination
     return () => window.removeEventListener('scroll', handleScroll); // Clean up on unmount
   }, [handleScroll]);
+  // console.log(user)
+  const id=user?._id
+  console.log(id)
 
   if (!user) return <p>Loading...</p>
 
@@ -195,7 +198,7 @@ const Profile = () => {
                   ) : (
                     <>
                       <Button onClick={(e) => handleFollowing(e, userID)} variant="secondary" className="mr-2 rounded-lg px-4" size="sm">{followingUserss?.includes(userID) ? "Following" : "follow"}</Button>
-                      <Link to="/direct/inbox">
+                      <Link to={`/direct/inbox/${id}`}>
                         <Button variant="secondary" className="rounded-lg px-4" size="sm">Message</Button>
                       </Link>
                     </>
@@ -220,15 +223,6 @@ const Profile = () => {
           </div>
 
           {/* Story highlights */}
-          <div className="mb-6 overflow-x-auto">
-            <div className="flex gap-4">
-              {userDetails?.id === userID && (
-                <>
-                  <StoryUpload />
-                </>
-              )}
-            </div>
-          </div>
 
           {/* Post Tabs */}
           <section className="mt-10 w-full h-auto">
