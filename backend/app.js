@@ -14,6 +14,18 @@ const cors = require('cors');
 const { server, app } = require('./socket/socket');
 const path = require('path');
 require('dotenv').config();
+// const session = require("express-session");
+const MongoStore = require("connect-mongo");
+
+app.use(
+  session({
+    secret: "your_secret_key",
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  })
+);
+
 
 // Connect to database
 connectDB();
