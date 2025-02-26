@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create ({
-    baseURL: 'https://instagram-backend-qqjd.onrender.com/api/auth'
+    baseURL: 'http://localhost:5000/api/auth'
 })
 
 export const googleAuth = (code) => api.post(`/google?code=${code}`);

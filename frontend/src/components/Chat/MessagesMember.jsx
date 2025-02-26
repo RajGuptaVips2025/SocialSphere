@@ -41,7 +41,7 @@ function MessagesMember({ socketRef }) {
                                         className="w-full h-full object-cover object-top"
                                         src={
                                             'groupName' in suggestedUser
-                                                ? `https://instagram-backend-qqjd.onrender.com/${suggestedUser?.groupImage}`
+                                                ? `http://localhost:5000/${suggestedUser?.groupImage}`
                                                 : suggestedUser?.profilePicture
                                         }
                                         alt={`${suggestedUser?.username}'s profile`}

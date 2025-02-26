@@ -10,7 +10,7 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'https://instagram-backend-qqjd.onrender.com', // Your backend URL
+      '/api': 'http://localhost:5000', // Your backend URL
     },
   },
 });
