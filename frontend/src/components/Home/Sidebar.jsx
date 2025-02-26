@@ -124,7 +124,7 @@ function Sidebar({ compact = false }) {
     };
 
     useEffect(() => {
-        fetchStories();
+        // fetchStories();
     }, [uploadSuccess]);
 
     const openWideView = (media) => {

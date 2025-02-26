@@ -70,7 +70,15 @@ const getAllPosts = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
 
   try {
-    const posts = await Post.find().skip(page * limit).limit(limit).populate('author', 'username profilePicture').populate('comments.user', 'username');
+    // const posts = await Post.find().skip(page * limit).limit(limit).populate('author', 'username profilePicture').populate('comments.user', 'username');
+    const posts = await Post.find()
+  .sort({ createdAt: -1 })  // ✅ Sort by latest posts
+  .skip(page * limit)
+  .limit(limit)
+  .populate('author', 'username profilePicture')
+  .populate('comments.user', 'username')
+  .lean(); // ✅ Faster response by returning plain JS objects
+
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });

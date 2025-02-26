@@ -42,6 +42,7 @@ const Profile = () => {
     try {
       setIsLoading(true);
       const { data } = await axios.get(`/api/users/${username}?page=${page}&limit=10`);
+      // console.log(data);
       setProfilePicture(data?.user?.profilePicture);
       setUserID(data?.user?._id);
       setUser(data.user);
@@ -82,18 +83,29 @@ const Profile = () => {
   }, [dispatch, userDetails.id]);
 
 
+  // const handleLogout = async () => {
+  //   try {
+  //     const { status } = await axios.get('/api/auth/logout');
+  //     if (status === 200) {
+  //       // console.log('Logged out successfully');
+  //       navigate('/login');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error during logout:', error.message);
+  //   }
+  // };
+
+
   const handleLogout = async () => {
     try {
-      const { status } = await axios.get('/api/auth/logout');
-      if (status === 200) {
-        // console.log('Logged out successfully');
-        navigate('/login');
-      }
+      localStorage.removeItem('user-info'); // Remove user info
+      navigate('/login'); // Redirect to login page
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error('Error during logout:', error.message);
     }
   };
-
+  
+  
   const showComments = (e, post) => {
     e.preventDefault();
     setSelectedMedia(post);

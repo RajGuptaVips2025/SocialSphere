@@ -20,6 +20,7 @@ import Sidebar from './components/Home/Sidebar';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import GuestRoute from './components/ProtectedRoute/GuestRoute';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
 
@@ -104,10 +105,12 @@ function ChildApp() {
 
 function App() {
   return (
-    <Router>
-      <ChildApp />
-      <ToastContainer />
-    </Router>
+    <GoogleOAuthProvider clientId="437090129528-9nlep5av6kefts61bhd92tlck71q6sk5.apps.googleusercontent.com">
+      <Router>
+        <ChildApp />
+        <ToastContainer />
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 
