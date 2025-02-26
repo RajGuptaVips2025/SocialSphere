@@ -14,17 +14,10 @@ const cors = require('cors');
 const { server, app } = require('./socket/socket');
 const path = require('path');
 require('dotenv').config();
-// const session = require("express-session");
-const MongoStore = require("connect-mongo");
 
-app.use(
-  session({
-    secret: "your_secret_key",
-    resave: false,
-    saveUninitialized: true,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-  })
-);
+const __direname = path.resolve();
+
+console.log(__direname);
 
 
 // Connect to database
@@ -41,6 +34,10 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__direname, "/frontend/dist")));
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__direname, "frontend", "dist", "index.html"));
+})
 
 // Routes
 app.use('/api/auth', authRoutes);
