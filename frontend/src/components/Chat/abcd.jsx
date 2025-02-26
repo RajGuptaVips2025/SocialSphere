@@ -1,17 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { setMessage, setSuggestedUser } from '../../features/userDetail/userDetailsSlice';
 import axios from 'axios';
 import { AiOutlineMessage } from 'react-icons/ai';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
-import { Camera, Heart, Info, Mic, Phone, Smile, Video, X } from 'lucide-react';
+import { Camera, Info, Phone, Smile, Video, X } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { Dialog, DialogTrigger, DialogContent, DialogClose } from "../ui/dialog";
-import VideoCall from './VideoCall';
 import GroupDetails from './GroupDetails';
+import { setMessages } from '@/features/userDetail/userDetailsSlice';
 // import { useVideoCall } from '@/hooks/VideoCallContext';
 
 
@@ -80,7 +79,7 @@ function ChatBox() {
                 });
 
             if (response.data.success) {
-                console.log(response.data.newMessage)
+                // console.log(response.data.newMessage)
                 dispatch(setMessages([...messages, response.data.newMessage]));
                 setTextMessage('');
                 setFile(null);  // Reset file input after sending
@@ -105,7 +104,7 @@ function ChatBox() {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     };
-    console.log(suggestedUser?._id)
+    // console.log(suggestedUser?._id)
 
     return (
         <>

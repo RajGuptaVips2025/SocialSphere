@@ -44,7 +44,7 @@ function Sidebar({ compact = false }) {
     const [step, setStep] = useState(1)
     const [selectedImage, setSelectedImage] = useState(null)
     const [file, setFile] = useState([]); // Array to store multiple files
-    console.log(file);
+    // console.log(file);
     const [getRes, setGetRes] = useState(false)
     const [filePreview, setFilePreview] = useState([]); // Array to store file previews
     const [wideView, setWideView] = useState({ isOpen: false, media: null });
@@ -187,7 +187,7 @@ function Sidebar({ compact = false }) {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            console.log("Submitting with image:", response.data)
+            // console.log("Submitting with image:", response.data)
             setIsOpen(false)
             setStep(1)
             setSelectedImage(null)
@@ -216,7 +216,7 @@ function Sidebar({ compact = false }) {
         if (searchQuery) {
             try {
                 const response = await axios.get(`/api/search/users?query=${searchQuery}`);
-                console.log(response.data)
+                // console.log(response.data)
                 setResults(response.data);
             } catch (error) {
                 console.error('Error fetching search results:', error);

@@ -141,7 +141,7 @@ const Home = ({ socketRef }) => {
         userId: userDetails.id,
         text: comment,
       });
-      console.log(updatedPost.comments)
+      // console.log(updatedPost.comments)
       setAllPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === postId ? updatedPost : post

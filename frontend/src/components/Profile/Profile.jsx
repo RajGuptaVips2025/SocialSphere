@@ -86,7 +86,7 @@ const Profile = () => {
     try {
       const { status } = await axios.get('/api/auth/logout');
       if (status === 200) {
-        console.log('Logged out successfully');
+        // console.log('Logged out successfully');
         navigate('/login');
       }
     } catch (error) {
@@ -160,7 +160,7 @@ const Profile = () => {
   }, [handleScroll]);
   // console.log(user)
   const id=user?._id
-  console.log(id)
+  // console.log(id)
 
   if (!user) return <p>Loading...</p>
 

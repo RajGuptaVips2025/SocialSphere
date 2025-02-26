@@ -6,7 +6,7 @@ import { Navigate } from 'react-router-dom';
 const ProtectedRoute = ({ children }) => {
   // const cookies = new Cookies();
   const cookies = useMemo(() => new Cookies(), []);
-  console.log(cookies);
+  // console.log(cookies);
   const [isAuthenticated, setIsAuthenticated] = useState(
     cookies.get('isAuthenticated') || null
   );

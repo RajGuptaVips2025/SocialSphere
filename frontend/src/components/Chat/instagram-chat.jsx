@@ -101,7 +101,7 @@ export function ChatComponent({ socketRef }) {
     try {
       const senderId = userDetails?.id;
       if (!senderId) {
-        console.log('User details not available yet.');
+        // console.log('User details not available yet.');
         return;  // Exit the function early if userDetails is not set
       }
 

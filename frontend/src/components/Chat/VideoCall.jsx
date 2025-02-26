@@ -50,7 +50,7 @@ const VideoCall = ({ userId, socketRef }) => {
 
 
     socketRef.current.on('endCall', ({ from }) => {
-      console.log('Call ended by user:', from);
+      // console.log('Call ended by user:', from);
 
       // Close the peer connection and stop the local stream
       if (peerConnection.current) {

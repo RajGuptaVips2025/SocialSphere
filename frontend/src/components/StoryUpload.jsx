@@ -32,7 +32,7 @@ const StoryUpload = () => {
       if (response.status === 200) {
         navigate("/");
       }
-      console.log("Story uploaded:", response);
+      // console.log("Story uploaded:", response);
       toast.success("Story is successfully uploaded!");
     } catch (error) {
       console.error("Error uploading story:", error);

@@ -7,7 +7,7 @@ import { useParams } from 'react-router-dom';
 
 function MessagesMember({ socketRef }) {
     const followingUsers = useSelector((state) => state.counter.followingUsers);
-    console.log(followingUsers)
+    // console.log(followingUsers)
     const onlineUsers = useSelector((state) => state.counter.onlineUsers);
     const { id } = useParams(); // Fetch the `id` from the route params
     const dispatch = useDispatch();
@@ -15,8 +15,8 @@ function MessagesMember({ socketRef }) {
     // Check if the `id` matches any user in the `followingUsers` array
     useEffect(() => {
         if (id) {
-            console.log("id   -->  ",id)
-            console.log("followingUsers  -->  ",followingUsers)
+            // console.log("id   -->  ",id)
+            // console.log("followingUsers  -->  ",followingUsers)
             const arrayOfFollowing=Object.values(followingUsers)
             const matchedUser = arrayOfFollowing?.find((user) => user._id === id);
             if (matchedUser) {

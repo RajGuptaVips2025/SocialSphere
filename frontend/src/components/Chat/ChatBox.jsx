@@ -22,11 +22,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 function ChatBox() {
     let suggestedUser = useSelector((state) => state.counter.suggestedUser);
-    console.log(suggestedUser);
+    // console.log(suggestedUser);
     const [groupMembers, setGroupMembers] = useState([]);
     const [isAdmin, setIsAdmin] = useState([]);
 
-    console.log(groupMembers);
+    // console.log(groupMembers);
     // Fetch and set group members when `suggestedUser` changes
     useEffect(() => {
         const members =
@@ -206,7 +206,7 @@ function ChatBox() {
 
             for (const userId of members) {
                 const response = await axios.put(`/api/conversations/group/add/member/${groupId}`, { userId });
-                console.log(`Added user ${userId}:`, response.data);
+                // console.log(`Added user ${userId}:`, response.data);
                 setGroupMembers((prevGroupMembers) => [
                     ...prevGroupMembers,
                     response.data.newUser
@@ -231,7 +231,7 @@ function ChatBox() {
             // Update state dynamically to remove the member from the list at runtime
             setGroupMembers((prevMembers) => {
                 const updatedMembers = prevMembers.filter((member) => member._id != userId);
-                console.log("Updated members:", updatedMembers); // Log to ensure state is updating
+                // console.log("Updated members:", updatedMembers); // Log to ensure state is updating
                 return updatedMembers;
             });
 
