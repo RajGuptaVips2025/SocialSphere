@@ -33,7 +33,7 @@ function ChildApp() {
 
   useEffect(() => {
     if (userDetails.id) {
-      const socket = io('http://localhost:5000', {
+      const socket = io('https://instagram-backend-qqjd.onrender.com', {
         query: { userId: userDetails.id },
       });
 
