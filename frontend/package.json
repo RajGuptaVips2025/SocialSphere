@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "vite preview",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@mirus/tiptap-editor": "^3.0.3",
@@ -67,3 +67,24 @@
     "vite": "^5.4.0"
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
