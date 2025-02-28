@@ -15,11 +15,6 @@ const { server, app } = require('./socket/socket');
 const path = require('path');
 require('dotenv').config();
 
-const __direname = path.resolve();
-
-console.log(__direname);
-
-
 // Connect to database
 connectDB();
 
@@ -34,10 +29,6 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 app.use(passport.initialize());
 app.use(passport.session());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__direname, "/frontend/dist")));
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__direname, "frontend", "dist", "index.html"));
-})
 
 // Routes
 app.use('/api/auth', authRoutes);

@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npx vite build",
+    "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "postinstall": "chmod +x ./node_modules/.bin/vite || true"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@mirus/tiptap-editor": "^3.0.3",
@@ -30,7 +29,6 @@
     "@tiptap/react": "^2.11.0",
     "@tiptap/starter-kit": "^2.11.0",
     "axios": "^1.7.3",
-    "backend": "file:..",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.3.1",
@@ -69,24 +67,3 @@
     "vite": "^5.4.0"
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
