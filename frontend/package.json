@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "start": "vite preview",
-    "lint": "eslint ."
-  },
+  "dev": "vite",
+  "build": "npx vite build",
+  "start": "vite preview",
+  "lint": "eslint ."
+},
   "dependencies": {
     "@mirus/tiptap-editor": "^3.0.3",
     "@radix-ui/react-avatar": "^1.1.1",
