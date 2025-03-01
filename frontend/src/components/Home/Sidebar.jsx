@@ -178,7 +178,8 @@ function Sidebar({ compact = false }) {
         });
 
         formData.append('caption', caption);
-        console.log("caption--->",caption)
+        // console.log("caption--->",caption)
+        console.log(formData.caption)
         formData.append('author', userDetails.id); // Assuming you have author/user info
 
         try {
