@@ -179,7 +179,7 @@ function Sidebar({ compact = false }) {
 
         formData.append('caption', "caption");
         // console.log("caption--->",caption)
-        console.log(formData.caption)
+        console.log(formData)
         formData.append('author', userDetails.id); // Assuming you have author/user info
 
         try {
@@ -193,7 +193,7 @@ function Sidebar({ compact = false }) {
             setIsOpen(false)
             setStep(1)
             setSelectedImage(null)
-            navigate(`/profile/${userDetails.username}/${response.data.newPost.caption}`);
+            navigate(`/profile/${userDetails.username}/${response?.data?.newPost?.caption}`);
             toast.success('Posted Successfully!');
 
         } catch (error) {
