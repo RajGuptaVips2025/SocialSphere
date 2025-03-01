@@ -23,7 +23,7 @@ connectDB();
 
 // Set the frontend URL dynamically for CORS
 const frontendURL = isProduction ? process.env.FRONTEND_PROD_URL : process.env.FRONTEND_DEV_URL;
-// console.log(frontendURL)
+console.log(frontendURL)
 
 app.use(cors({
   origin: frontendURL, // Uses dynamic URL for CORS
