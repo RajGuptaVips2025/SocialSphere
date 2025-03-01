@@ -21,7 +21,7 @@ export default function Dashboard() {
   const navigate=useNavigate()
   const fetchUserData = useCallback(async () => {
     try {
-      const { data } = await api.get(`/api/users/dashboard/${userDetails.username}`);
+      const { data } = await api.get(`/users/dashboard/${userDetails.username}`);
   
       // Set the total likes, comments, and views based on the lengths of the arrays
       setTotalLikes(data?.totalLikes);

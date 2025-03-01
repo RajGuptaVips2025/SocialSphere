@@ -41,7 +41,7 @@ export function ProfileEdit() {
 
     try {
       setIsResOk(false)
-      const response = await api.post(`/api/users/edit/${id}`, formData, { withCredentials: true });
+      const response = await api.post(`/users/edit/${id}`, formData, { withCredentials: true });
       const profilePic = response?.data?.user?.profilePicture
       dispatch(addUser({
         fullName: response?.data?.user?.fullName,

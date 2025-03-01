@@ -19,7 +19,7 @@ const ExploreGrid = () => {
 
     const fetchPosts = async () => {
         try {
-            const { data: posts } = await api.get('/api/posts/getPosts');
+            const { data: posts } = await api.get('/posts/getPosts');
             setAllPosts(posts.reverse());
         } catch (error) {
             console.error('Error fetching posts:', error);

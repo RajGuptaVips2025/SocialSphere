@@ -34,7 +34,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
     // Fetch comments from the server
     const fetchComments = async () => {
         try {
-            const response = await api.get(`/api/posts/${PostDetails?._id}/comment`);
+            const response = await api.get(`/posts/${PostDetails?._id}/comment`);
             setCommentsArr(response?.data?.comments);
         } catch (error) {
             if (error?.response?.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
@@ -47,7 +47,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
         e.preventDefault();
         if (!comment.trim()) return;
         try {
-            await api.post(`/api/posts/${postId}/comment`, {
+            await api.post(`/posts/${postId}/comment`, {
                 userId: userDetails.id,
                 text: comment,
             });
@@ -64,7 +64,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
     const handleRemoveComment = async (e, postId, commentId) => {
         e.preventDefault()
         try {
-            const response = await api.delete(`/api/posts/${postId}/comment/${commentId}`);
+            const response = await api.delete(`/posts/${postId}/comment/${commentId}`);
 
             if (response.status === 200) {
                 setCommentsArr(response?.data?.post?.comments);
@@ -81,7 +81,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
         e.preventDefault();
         const userId = userDetails.id;
         try {
-            const response = await api.put(`/api/posts/${postId}/like`, { userId });
+            const response = await api.put(`/posts/${postId}/like`, { userId });
             setLiked(prevLiked => {
                 const userHasLiked = prevLiked.includes(userId);
                 if (userHasLiked) {
@@ -102,7 +102,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
         e.preventDefault();
         const userId = userDetails.id;
         try {
-            const response = await api.put(`/api/posts/${userId}/save`, {
+            const response = await api.put(`/posts/${userId}/save`, {
                 postId,
             });
             const savedPosts = response.data.savedPosts

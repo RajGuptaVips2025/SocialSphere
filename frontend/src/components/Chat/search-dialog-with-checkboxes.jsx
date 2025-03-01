@@ -58,7 +58,7 @@ export function SearchDialogWithCheckboxesComponent({ socketRef }) {
   
   const handleCreateGroup = async () => {
     try {
-      const response = await api.post(`/api/conversations/group/create`, {
+      const response = await api.post(`/conversations/group/create`, {
         groupName,
         members,
         createdBy: userDetails.id
@@ -74,7 +74,7 @@ export function SearchDialogWithCheckboxesComponent({ socketRef }) {
   
   const getFollower = async () => {
     try {
-      const response = await api.get(`/api/conversations/followingUsers/${userDetails.username}`);
+      const response = await api.get(`/conversations/followingUsers/${userDetails.username}`);
       setFollowingUser(response?.data || []);
     } catch (error) {
       console.error("Error fetching followers:", error);

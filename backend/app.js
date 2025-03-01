@@ -25,11 +25,30 @@ connectDB();
 const frontendURL = isProduction ? process.env.FRONTEND_PROD_URL : process.env.FRONTEND_DEV_URL;
 console.log(frontendURL)
 
+// app.use(cors({
+//   origin: frontendURL, // Uses dynamic URL for CORS
+//   methods: ['GET', 'POST', 'PUT'],
+//   credentials: true
+// }));
+
 app.use(cors({
-  origin: frontendURL, // Uses dynamic URL for CORS
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    const allowedOrigins = [
+      process.env.FRONTEND_PROD_URL, // e.g., https://instagram-frontend-j39q.onrender.com
+      process.env.FRONTEND_DEV_URL   // e.g., http://localhost:5173
+    ];
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT'],
   credentials: true
 }));
+
 
 app.use(express.json());
 app.use(cookieParser());

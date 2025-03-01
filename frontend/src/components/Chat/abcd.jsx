@@ -76,7 +76,7 @@ function ChatBox() {
                 await api.post(`/conversations/group/send/message/${suggestedUser?._id}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 }) :
-                await api.post(`/api/conversations/send/message/${reciverId}`, formData, {
+                await api.post(`/conversations/send/message/${reciverId}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 

@@ -43,7 +43,7 @@ const Profile = () => {
   const fetchUserData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data } = await api.get(`/api/users/${username}?page=${page}&limit=10`);
+      const { data } = await api.get(`/users/${username}?page=${page}&limit=10`);
       // console.log(data);
       setProfilePicture(data?.user?.profilePicture);
       setUserID(data?.user?._id);
@@ -75,7 +75,7 @@ const Profile = () => {
   // Fetch the following users list
   const getFollowing = useCallback(async () => {
     try {
-      const { data } = await api.get(`/api/users/${userDetails.id}/following`);
+      const { data } = await api.get(`/users/${userDetails.id}/following`);
       const following = data?.user?.following
       setFollowingUserss(data?.user?.following)
       dispatch(setFollowing([...following]));
@@ -117,7 +117,7 @@ const Profile = () => {
 
   const handleDeletePost = async (e, postId) => {
     e.preventDefault()
-    const response = await api.delete(`/api/posts/delete/${postId}`);
+    const response = await api.delete(`/posts/delete/${postId}`);
     setPostsArr((prevPosts) => prevPosts.filter((post) => post?._id !== response?.data?.post?._id))
     toast.info("Deleted Successfully!")
   }
@@ -127,7 +127,7 @@ const Profile = () => {
     e.preventDefault();
     const userId = userDetails.id;
     try {
-      const { data: { following, followers } } = await api.put(`/api/users/${userId}/following`, { followingID });
+      const { data: { following, followers } } = await api.put(`/users/${userId}/following`, { followingID });
       dispatch(setFollowing(following));
       dispatch(setFollower(followers));
       setFollowingUserss(following);

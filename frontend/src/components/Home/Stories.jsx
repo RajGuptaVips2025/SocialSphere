@@ -22,7 +22,7 @@ export default function Stories() {
 
     const getFollowing = async () => {
     try {
-      const { data } = await api.get(`/api/users/${userDetails.id}/following`)
+      const { data } = await api.get(`/users/${userDetails.id}/following`)
   
       // Separate user's own story
       const userStory = data?.stories.find(

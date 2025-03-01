@@ -32,7 +32,7 @@ const CreatePost = () => {
 
     try {
       setIsResOk(false);
-      const response = await api.post('/api/posts/create', formData, {
+      const response = await api.post('/posts/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

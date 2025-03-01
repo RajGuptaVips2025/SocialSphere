@@ -51,21 +51,35 @@ export function ChatComponent({ socketRef }) {
   };
 
 
-  const getRealTimeMessages = () => {
-    if (socketRef.current) {
-      socketRef.current.on('newMessage', (newMessage) => {
-        Array.isArray(messages) ?
-          dispatch(setMessages([...messages, newMessage])) : "no";
-      });
+  // const getRealTimeMessages = () => {
+  //   if (socketRef.current) {
+  //     socketRef.current.on('newMessage', (newMessage) => {
+  //       Array.isArray(messages) ?
+  //         dispatch(setMessages([...messages, newMessage])) : "no";
+  //     });
 
-      socketRef.current.on('sendGroupMessage', (newMessage) => {
-        Array.isArray(messages) ?
-          dispatch(setMessages([...messages, newMessage])) : "no";
-      });
-    } else {
+  //     socketRef.current.on('sendGroupMessage', (newMessage) => {
+  //       Array.isArray(messages) ?
+  //         dispatch(setMessages([...messages, newMessage])) : "no";
+  //     });
+  //   } else {
+  //     console.error('Socket not initialized');
+  //   }
+  // }
+
+  const getRealTimeMessages = () => {
+    if (!socketRef.current) {
       console.error('Socket not initialized');
+      return;
     }
+    socketRef.current.on('newMessage', (newMessage) => {
+      dispatch(setMessages([...messages, newMessage]));
+    });
+    socketRef.current.on('sendGroupMessage', (newMessage) => {
+      dispatch(setMessages([...messages, newMessage]));
+    });
   }
+  
 
   useEffect(() => {
     getRealTimeMessages();
