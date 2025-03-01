@@ -196,7 +196,7 @@ function Sidebar({ compact = false }) {
             toast.success('Posted Successfully!');
 
         } catch (error) {
-            console.error('Error creating post:', error);
+            console.error('Error creating post:', error.message);
             toast.error("Caption field cannot be empty!")
         } finally {
             setIsResOk(true);
