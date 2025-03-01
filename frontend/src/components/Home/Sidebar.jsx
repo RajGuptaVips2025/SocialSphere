@@ -183,7 +183,7 @@ function Sidebar({ compact = false }) {
 
         try {
             setIsResOk(false);
-            const response = await axios.post('/api/posts/create', formData, {
+            const response = await axios.post('https://instagram-backend-lxea.onrender.com/api/posts/create', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
