@@ -197,7 +197,7 @@ function Sidebar({ compact = false }) {
 
         } catch (error) {
             console.error('Error creating post:', error.message);
-            toast.error("Caption field cannot be empty!")
+            toast.error(error.message)
         } finally {
             setIsResOk(true);
             setGetRes(false)
