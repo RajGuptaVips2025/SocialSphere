@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { setMessages, setSuggestedUser } from '../../features/userDetail/userDetailsSlice';
-import axios from 'axios';
+// import api from 'api';
 import { AiOutlineMessage } from 'react-icons/ai';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
@@ -18,7 +18,7 @@ import { Checkbox } from '../ui/checkbox';
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-
+import api from '@/api/api';
 
 function ChatBox() {
     let suggestedUser = useSelector((state) => state.counter.suggestedUser);
@@ -71,7 +71,7 @@ function ChatBox() {
         try {
             const groupId = suggestedUser._id;
             // Replace `/api/group/${groupId}/rename` with your actual backend endpoint
-            const response = await axios.put(`/api/conversations/group/update/groupName/${groupId}`, {
+            const response = await api.put(`/conversations/group/update/groupName/${groupId}`, {
                 groupName: newGroupName.trim(),
             });
 
@@ -143,10 +143,10 @@ function ChatBox() {
             formData.append('messageType', file ? (file.type.includes('video') ? 'video' : 'image') : 'text');
 
             const response = suggestedUser && 'groupName' in suggestedUser ?
-                await axios.post(`/api/conversations/group/send/message/${suggestedUser?._id}`, formData, {
+                await api.post(`/conversations/group/send/message/${suggestedUser?._id}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 }) :
-                await axios.post(`/api/conversations/send/message/${reciverId}`, formData, {
+                await api.post(`/conversations/send/message/${reciverId}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
@@ -181,7 +181,7 @@ function ChatBox() {
         setQuery(searchQuery);
         if (searchQuery) {
             try {
-                const response = await axios.get(`/api/search/users?query=${searchQuery}`);
+                const response = await api.get(`/search/users?query=${searchQuery}`);
                 // console.log(response.data)
                 setResults(response.data);
             } catch (error) {
@@ -205,7 +205,7 @@ function ChatBox() {
             const members = selected.map((user) => user._id);
 
             for (const userId of members) {
-                const response = await axios.put(`/api/conversations/group/add/member/${groupId}`, { userId });
+                const response = await api.put(`/conversations/group/add/member/${groupId}`, { userId });
                 // console.log(`Added user ${userId}:`, response.data);
                 setGroupMembers((prevGroupMembers) => [
                     ...prevGroupMembers,
@@ -225,7 +225,7 @@ function ChatBox() {
             const groupId = suggestedUser._id; // Ensure this is the correct group ID
 
             // Send request to remove member
-            const response = await axios.put(`/api/conversations/group/remove/member/${groupId}`, {
+            const response = await api.put(`/conversations/group/remove/member/${groupId}`, {
                 userId,
             });
             // Update state dynamically to remove the member from the list at runtime

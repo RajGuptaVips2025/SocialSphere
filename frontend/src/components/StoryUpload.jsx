@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import { Navigate, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import api from "@/api/api";
 
 const StoryUpload = () => {
   const [media, setMedia] = useState(null);
@@ -26,7 +27,7 @@ const StoryUpload = () => {
     formData.append("type", type);
 
     try {
-      const response = await axios.post("/api/story/uploadStory", formData, {
+      const response = await api.post("/api/story/uploadStory", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       if (response.status === 200) {

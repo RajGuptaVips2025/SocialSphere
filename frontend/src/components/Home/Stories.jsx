@@ -8,6 +8,7 @@ import { Dialog, DialogContent } from '../ui/dialog'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
+import api from '@/api/api'
 
 export default function Stories() {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0)
@@ -21,7 +22,7 @@ export default function Stories() {
 
     const getFollowing = async () => {
     try {
-      const { data } = await axios.get(`/api/users/${userDetails.id}/following`)
+      const { data } = await api.get(`/api/users/${userDetails.id}/following`)
   
       // Separate user's own story
       const userStory = data?.stories.find(

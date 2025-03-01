@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
+import api from "@/api/api";
 
 export default function Dashboard() {
   const userDetails = useSelector((state) => state.counter.userDetails);
@@ -20,7 +21,7 @@ export default function Dashboard() {
   const navigate=useNavigate()
   const fetchUserData = useCallback(async () => {
     try {
-      const { data } = await axios.get(`/api/users/dashboard/${userDetails.username}`);
+      const { data } = await api.get(`/api/users/dashboard/${userDetails.username}`);
   
       // Set the total likes, comments, and views based on the lengths of the arrays
       setTotalLikes(data?.totalLikes);

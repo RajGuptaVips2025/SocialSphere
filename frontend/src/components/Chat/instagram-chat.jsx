@@ -10,14 +10,13 @@ import { BiSolidMoviePlay } from "react-icons/bi"
 import { FiSend } from "react-icons/fi"
 import { CiSquarePlus } from "react-icons/ci"
 import { RxHamburgerMenu } from "react-icons/rx"
-import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFollowingUsers, setMessages, setSuggestedUser } from '@/features/userDetail/userDetailsSlice';
 import ChatBox from "./ChatBox"
 import { SearchDialogWithCheckboxesComponent } from "./search-dialog-with-checkboxes"
 import { IoIosArrowDown } from "react-icons/io";
 import Sidebar from "../Home/Sidebar"
-
+import api from "@/api/api"
 
 export function ChatComponent({ socketRef }) {
   const links = [
@@ -39,8 +38,8 @@ export function ChatComponent({ socketRef }) {
 
   const getFollowingUsers = async (username) => {
     try {
-      const response = await axios.get(`/api/conversations/followingUsers/${username}`);
-      const gropuResponse = await axios.get(`/api/conversations/groups/${userDetails.id}`);
+      const response = await api.get(`/conversations/followingUsers/${username}`);
+      const gropuResponse = await api.get(`/conversations/groups/${userDetails.id}`);
       const followingUsers = [...response?.data, ...gropuResponse?.data]
       dispatch(setFollowingUsers(followingUsers))
       return response.data;
@@ -106,10 +105,10 @@ export function ChatComponent({ socketRef }) {
       }
 
       if (suggestedUser && Object.keys(suggestedUser).length > 0) {
-        const response = await axios.get(
+        const response = await api.get(
           suggestedUser && 'groupName' in suggestedUser
-            ? `/api/conversations/group/messages/${suggestedUser?._id}`
-            : `/api/conversations/all/messages/${suggestedUser?._id}?senderId=${senderId}`
+            ? `/conversations/group/messages/${suggestedUser?._id}`
+            : `/conversations/all/messages/${suggestedUser?._id}?senderId=${senderId}`
         );
 
         if (response.data.success) {

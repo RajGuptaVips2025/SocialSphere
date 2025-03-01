@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setSavedPosts, setSelectedPost } from '@/features/userDetail/userDetailsSlice';
 import { FaHeart } from "react-icons/fa";
 import { IoAddSharp } from "react-icons/io5";
-import axios from 'axios';
+// import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from '../ui/button';
@@ -17,6 +17,7 @@ import { Dialog, DialogClose, DialogContent, DialogTrigger } from '../ui/dialog'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import api from '@/api/api';
 
 
 function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
@@ -33,7 +34,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
     // Fetch comments from the server
     const fetchComments = async () => {
         try {
-            const response = await axios.get(`/api/posts/${PostDetails?._id}/comment`);
+            const response = await api.get(`/api/posts/${PostDetails?._id}/comment`);
             setCommentsArr(response?.data?.comments);
         } catch (error) {
             if (error?.response?.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
@@ -46,7 +47,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
         e.preventDefault();
         if (!comment.trim()) return;
         try {
-            await axios.post(`/api/posts/${postId}/comment`, {
+            await api.post(`/api/posts/${postId}/comment`, {
                 userId: userDetails.id,
                 text: comment,
             });
@@ -63,7 +64,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
     const handleRemoveComment = async (e, postId, commentId) => {
         e.preventDefault()
         try {
-            const response = await axios.delete(`/api/posts/${postId}/comment/${commentId}`);
+            const response = await api.delete(`/api/posts/${postId}/comment/${commentId}`);
 
             if (response.status === 200) {
                 setCommentsArr(response?.data?.post?.comments);
@@ -80,7 +81,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
         e.preventDefault();
         const userId = userDetails.id;
         try {
-            const response = await axios.put(`/api/posts/${postId}/like`, { userId });
+            const response = await api.put(`/api/posts/${postId}/like`, { userId });
             setLiked(prevLiked => {
                 const userHasLiked = prevLiked.includes(userId);
                 if (userHasLiked) {
@@ -101,7 +102,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
         e.preventDefault();
         const userId = userDetails.id;
         try {
-            const response = await axios.put(`/api/posts/${userId}/save`, {
+            const response = await api.put(`/api/posts/${userId}/save`, {
                 postId,
             });
             const savedPosts = response.data.savedPosts

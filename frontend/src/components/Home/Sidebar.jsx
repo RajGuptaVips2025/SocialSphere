@@ -26,6 +26,7 @@ import "swiper/css/navigation";
 import { Navigation } from "swiper/modules";
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { toast } from 'react-toastify';
+import api from '@/api/api';
 
 
 function Sidebar({ compact = false }) {
@@ -93,7 +94,7 @@ function Sidebar({ compact = false }) {
         });
 
         try {
-            const response = await axios.post("/api/story/uploadStory", formData, {
+            const response = await api.post("/api/story/uploadStory", formData, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
             if (response.status === 200) {
@@ -112,7 +113,7 @@ function Sidebar({ compact = false }) {
 
     const fetchStories = async () => {
         try {
-            const response = await axios.get(`/api/story/getStories/${userDetails.id}`); // Replace `userId` with actual user ID logic
+            const response = await api.get(`/api/story/getStories/${userDetails.id}`); // Replace `userId` with actual user ID logic
             if (response.status === 200) {
                 setStories(response.data.story.media || []);
             } else {
@@ -184,7 +185,7 @@ function Sidebar({ compact = false }) {
 
         try {
             setIsResOk(false);
-            const response = await axios.post('/api/posts/create', formData, {
+            const response = await api.post('/api/posts/create', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -217,7 +218,7 @@ function Sidebar({ compact = false }) {
         setQuery(searchQuery);
         if (searchQuery) {
             try {
-                const response = await axios.get(`/api/search/users?query=${searchQuery}`);
+                const response = await api.get(`/api/search/users?query=${searchQuery}`);
                 // console.log(response.data)
                 setResults(response.data);
             } catch (error) {

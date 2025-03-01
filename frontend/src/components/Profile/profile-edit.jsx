@@ -10,12 +10,13 @@ import { TiDeviceLaptop } from "react-icons/ti"
 import { settingsLinks } from "./settingsLinks"
 import { useNavigate, useParams } from "react-router-dom"
 import { useState } from "react"
-import axios from "axios"
+// import axios from "axios"
 import Sidebar from "../Home/Sidebar"
 import { addUser } from "@/features/userDetail/userDetailsSlice"
 import { useDispatch } from "react-redux"
 import { ReloadIcon } from "@radix-ui/react-icons"
 import { toast } from "react-toastify"
+import api from "@/api/api"
 
 export function ProfileEdit() {
   const { id } = useParams();
@@ -40,7 +41,7 @@ export function ProfileEdit() {
 
     try {
       setIsResOk(false)
-      const response = await axios.post(`/api/users/edit/${id}`, formData, { withCredentials: true });
+      const response = await api.post(`/api/users/edit/${id}`, formData, { withCredentials: true });
       const profilePic = response?.data?.user?.profilePicture
       dispatch(addUser({
         fullName: response?.data?.user?.fullName,

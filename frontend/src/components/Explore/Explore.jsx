@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../Home/Sidebar';
-import axios from 'axios';
+// import axios from 'axios';
 import { BiSolidMoviePlay } from 'react-icons/bi';
 import { FaHeart } from 'react-icons/fa';
 import { IoChatbubbleSharp } from "react-icons/io5";
@@ -8,6 +8,7 @@ import PostComment from '../Home/PostComment';
 import { useDispatch } from 'react-redux';
 import { setSelectedPost } from '@/features/userDetail/userDetailsSlice';
 import { useNavigate } from 'react-router-dom';
+import api from '@/api/api';
 
 const ExploreGrid = () => {
     const [allPosts, setAllPosts] = useState([]);
@@ -18,7 +19,7 @@ const ExploreGrid = () => {
 
     const fetchPosts = async () => {
         try {
-            const { data: posts } = await axios.get('/api/posts/getPosts');
+            const { data: posts } = await api.get('/api/posts/getPosts');
             setAllPosts(posts.reverse());
         } catch (error) {
             console.error('Error fetching posts:', error);

@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { GoBookmark, GoBookmarkFill } from 'react-icons/go';
 import { BsThreeDots } from "react-icons/bs";
-import axios from 'axios';
+// import axios from 'axios';
 import { Button } from '../ui/button';
 import { Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '../ui/drawer';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import api from '@/api/api';
 
 const ReelSection = () => {
     const userDetails = useSelector((state) => state.counter.userDetails);
@@ -33,7 +34,7 @@ const ReelSection = () => {
     const fetchPosts = useCallback(async () => {
         try {
             setLoading(true);
-            const { data: posts } = await axios.get(`/api/posts/getPosts?page=${page}&limit=10`);
+            const { data: posts } = await api.get(`/api/posts/getPosts?page=${page}&limit=10`);
             // const reels = posts.filter(post => post?.media[0]?.mediaType === 'video');
 
             const videoPosts = posts.map(post => {
@@ -65,7 +66,7 @@ const ReelSection = () => {
     const getSavePosts = useCallback(async () => {
         try {
             const userId = userDetails.id;
-            const { data: { savedPosts } } = await axios.get(`/api/posts/${userId}/save`);
+            const { data: { savedPosts } } = await api.get(`/api/posts/${userId}/save`);
             dispatch(setSavedPosts(savedPosts));
         } catch (error) {
             console.error('Error fetching saved posts:', error);
@@ -80,7 +81,7 @@ const ReelSection = () => {
 
         try {
             // API request to like the post
-            const { data: updatedPost } = await axios.put(`/api/posts/${postId}/like`, { userId });
+            const { data: updatedPost } = await api.put(`/api/posts/${postId}/like`, { userId });
 
             // Update the post locally in the state
             setAllPosts((prevPosts) =>
@@ -98,7 +99,7 @@ const ReelSection = () => {
     const handleSavePosts = useCallback(async (e, postId) => {
         e.preventDefault();
         try {
-            const { data: { savedPosts } } = await axios.put(`/api/posts/${userDetails.id}/save`, { postId });
+            const { data: { savedPosts } } = await api.put(`/api/posts/${userDetails.id}/save`, { postId });
             dispatch(setSavedPosts(savedPosts));
         } catch (error) {
             console.error('Error saving the post:', error);
@@ -122,7 +123,7 @@ const ReelSection = () => {
     const addToHistory = useCallback(async (postId) => {
         try {
             const userId = userDetails.id;
-            const response = await axios.post(`/api/users/reelHistory/${userId}/${postId}`);
+            const response = await api.post(`/api/users/reelHistory/${userId}/${postId}`);
             const watchHistory = response?.data?.user?.reelHistory
             dispatch(setWatchHistory([watchHistory]));
         } catch (error) {
@@ -134,7 +135,7 @@ const ReelSection = () => {
     const handleRemoveComment = async (e, postId, commentId) => {
         e.preventDefault()
         try {
-            const response = await axios.delete(`/api/posts/${postId}/comment/${commentId}`);
+            const response = await api.delete(`/api/posts/${postId}/comment/${commentId}`);
 
             if (response.status === 200) {
                 setCommentsArr(response?.data?.post?.comments);
@@ -185,7 +186,7 @@ const ReelSection = () => {
     // Fetch comments from the server
     const fetchComments = async () => {
         try {
-            const response = await axios.get(`/api/posts/${PostDetails?._id}/comment`);
+            const response = await api.get(`/api/posts/${PostDetails?._id}/comment`);
             setCommentsArr(response?.data?.comments);
         } catch (error) {
             if (error?.response?.statusText === "Unauthorized" || error.response?.status === 403) navigate('/login')
@@ -198,7 +199,7 @@ const ReelSection = () => {
         e.preventDefault();
         if (!comment.trim()) return;
         try {
-            await axios.post(`/api/posts/${postId}/comment`, {
+            await api.post(`/api/posts/${postId}/comment`, {
                 userId: userDetails.id,
                 text: comment,
             });

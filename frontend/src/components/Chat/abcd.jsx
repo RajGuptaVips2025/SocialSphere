@@ -12,6 +12,7 @@ import { ReloadIcon } from '@radix-ui/react-icons';
 import { Dialog, DialogTrigger, DialogContent, DialogClose } from "../ui/dialog";
 import VideoCall from './VideoCall';
 import GroupDetails from './GroupDetails';
+import api from '@/api/api';
 // import { useVideoCall } from '@/hooks/VideoCallContext';
 
 
@@ -72,10 +73,10 @@ function ChatBox() {
             formData.append('messageType', file ? (file.type.includes('video') ? 'video' : 'image') : 'text');
 
             const response = suggestedUser && 'groupName' in suggestedUser ?
-                await axios.post(`/api/conversations/group/send/message/${suggestedUser?._id}`, formData, {
+                await api.post(`/conversations/group/send/message/${suggestedUser?._id}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 }) :
-                await axios.post(`/api/conversations/send/message/${reciverId}`, formData, {
+                await api.post(`/api/conversations/send/message/${reciverId}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 

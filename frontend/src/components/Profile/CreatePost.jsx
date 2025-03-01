@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { ReloadIcon } from '@radix-ui/react-icons';
+import api from '@/api/api';
 
 const CreatePost = () => {
   const userDetails = useSelector((state) => state.counter.userDetails);
@@ -31,7 +32,7 @@ const CreatePost = () => {
 
     try {
       setIsResOk(false);
-      const response = await axios.post('/api/posts/create', formData, {
+      const response = await api.post('/api/posts/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

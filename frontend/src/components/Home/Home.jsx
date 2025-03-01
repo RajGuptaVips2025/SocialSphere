@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import SuggestedUsers from './SuggestedUsers';
-import axios from 'axios';
+// import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSavedPosts, setFollowing, setFollower, setSelectedPost, setRtmNotification } from '@/features/userDetail/userDetailsSlice'; // Adjust paths as necessary
 import PostComment from './PostComment';
@@ -9,6 +9,7 @@ import Post from './Post';
 import Stories from './Stories';
 import { InstagramSkeletonComponent } from './instagram-skeleton';
 import { useNavigate } from 'react-router-dom';
+import api from '@/api/api';
 
 const Home = ({ socketRef }) => {
   const [allPosts, setAllPosts] = useState([]);
@@ -28,7 +29,7 @@ const Home = ({ socketRef }) => {
   const fetchPosts = async (page) => {
     setIsLoading(true);
     try {
-      const { data: posts } = await axios.get(`${import.meta.env.VITE_API_BASE_URL_PROD}/posts/getPosts?page=${page}&limit=10`);
+      const { data: posts } = await api.get(`${import.meta.env.VITE_API_BASE_URL_PROD}/posts/getPosts?page=${page}&limit=10`);
       console.log(posts)
       if (posts.length > 0) {
         setAllPosts((prevPosts) => [...prevPosts, ...posts]);
@@ -54,7 +55,7 @@ const Home = ({ socketRef }) => {
 
     try {
       // API request to like the post
-      const { data: updatedPost } = await axios.put(`/api/posts/${postId}/like`, { userId });
+      const { data: updatedPost } = await api.put(`/api/posts/${postId}/like`, { userId });
       // Update the post locally in the state
       setAllPosts((prevPosts) =>
         prevPosts.map((post) =>
@@ -69,7 +70,7 @@ const Home = ({ socketRef }) => {
 
   const handleDeletePost = async (e, postId) => {
     e.preventDefault()
-    const response = await axios.delete(`/api/posts/delete/${postId}`);
+    const response = await api.delete(`/api/posts/delete/${postId}`);
     setAllPosts((prevPosts) => prevPosts.filter((post) => post?._id !== response?.data?.post?._id))
   }
 
@@ -78,7 +79,7 @@ const Home = ({ socketRef }) => {
     const userId = userDetails.id;
 
     try {
-      const { data: { savedPosts } } = await axios.put(`/api/posts/${userId}/save`, { postId });
+      const { data: { savedPosts } } = await api.put(`/api/posts/${userId}/save`, { postId });
 
       dispatch(setSavedPosts(savedPosts));
     } catch (error) {
@@ -91,7 +92,7 @@ const Home = ({ socketRef }) => {
     const userId = userDetails.id;
 
     try {
-      const { data: { savedPosts } } = await axios.get(`/api/posts/${userId}/save`);
+      const { data: { savedPosts } } = await api.get(`/api/posts/${userId}/save`);
       dispatch(setSavedPosts(savedPosts));
     } catch (error) {
       console.error('Error fetching saved posts:', error);
@@ -108,7 +109,7 @@ const Home = ({ socketRef }) => {
 
   const getFollowing = async () => {
     try {
-      const { data } = await axios.get(`/api/users/${userDetails.id}/following`);
+      const { data } = await api.get(`/api/users/${userDetails.id}/following`);
       // console.log(data)
       const following = data?.user?.following
       setFollowingUserss(data?.user?.following)
@@ -123,7 +124,7 @@ const Home = ({ socketRef }) => {
     const userId = userDetails.id;
 
     try {
-      const { data: { following, followers } } = await axios.put(`/api/users/${userId}/following`, { followingID });
+      const { data: { following, followers } } = await api.put(`/api/users/${userId}/following`, { followingID });
       dispatch(setFollowing(following));
       dispatch(setFollower(followers));
       setFollowingUserss(following);
@@ -138,7 +139,7 @@ const Home = ({ socketRef }) => {
     if (!comment.trim()) return;
 
     try {
-      const { data: updatedPost } = await axios.post(`/api/posts/${postId}/comment`, {
+      const { data: updatedPost } = await api.post(`/api/posts/${postId}/comment`, {
         userId: userDetails.id,
         text: comment,
       });
