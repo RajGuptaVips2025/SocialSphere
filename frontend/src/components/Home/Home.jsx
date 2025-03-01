@@ -28,7 +28,7 @@ const Home = ({ socketRef }) => {
   const fetchPosts = async (page) => {
     setIsLoading(true);
     try {
-      const { data: posts } = await axios.get(`/api/posts/getPosts?page=${page}&limit=10`);
+      const { data: posts } = await axios.get(`${import.meta.env.VITE_API_BASE_URL_PROD}/posts/getPosts?page=${page}&limit=10`);
       console.log(posts)
       if (posts.length > 0) {
         setAllPosts((prevPosts) => [...prevPosts, ...posts]);
