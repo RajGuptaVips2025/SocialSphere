@@ -30,7 +30,6 @@ const Home = ({ socketRef }) => {
     setIsLoading(true);
     try {
       const { data: posts } = await api.get(`/posts/getPosts?page=${page}&limit=10`);
-      console.log(posts)
       if (posts.length > 0) {
         setAllPosts((prevPosts) => [...prevPosts, ...posts]);
       } else {
