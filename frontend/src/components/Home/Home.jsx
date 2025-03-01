@@ -22,7 +22,6 @@ const Home = ({ socketRef }) => {
 
   const savedPosts = useSelector((state) => state.counter.savedPosts);
   const userDetails = useSelector((state) => state.counter.userDetails);
-  console.log(userDetails)
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

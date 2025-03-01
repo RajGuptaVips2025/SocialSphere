@@ -23,7 +23,6 @@ import GuestRoute from './components/ProtectedRoute/GuestRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 
-
 function ChildApp() {
   const userDetails = useSelector((state) => state.counter.userDetails);
   const dispatch = useDispatch();
@@ -31,9 +30,16 @@ function ChildApp() {
   const navigate = useNavigate();
   const location = useLocation(); // Access the current route
 
+  const BASE_URL =
+    import.meta.env.MODE === "development"
+      ? import.meta.env.VITE_API_BASE_URL_DEV
+      : import.meta.env.VITE_API_BASE_URL_PROD;
+  
+  // console.log(BASE_URL);
+
   useEffect(() => {
     if (userDetails.id) {
-      const socket = io('http://localhost:5000', {
+      const socket = io(BASE_URL, {
         query: { userId: userDetails.id },
       });
 
@@ -57,6 +63,7 @@ function ChildApp() {
   }, [userDetails, dispatch, navigate]);
 
 
+
   const hideNavbar = ['/login', '/register', '/direct/inbox'].includes(location.pathname) ||
     matchPath("/profile/:username", location.pathname) ||
     matchPath("/call/:remoteUserId/", location.pathname) ||
@@ -66,6 +73,7 @@ function ChildApp() {
   // Define routes where the Sidebar should be visible, excluding login and register paths
   const showSidebar = ['/', '/profile/:username', '/explore', '/reels', '/admindashboard']
     .some((path) => location.pathname.startsWith(path)) && !['/login', '/register', '/direct/inbox'].includes(location.pathname);
+
 
   return (
     <>
@@ -103,9 +111,10 @@ function ChildApp() {
   );
 }
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 function App() {
   return (
-    <GoogleOAuthProvider clientId="437090129528-9nlep5av6kefts61bhd92tlck71q6sk5.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={googleClientId}>
       <Router>
         <ChildApp />
         <ToastContainer />
@@ -115,3 +124,35 @@ function App() {
 }
 
 export default App;
+
+
+
+// const BASE_URL =
+//   import.meta.env.MODE === 'development'
+//     ? import.meta.env.VITE_API_URL_DEV
+//     : import.meta.env.VITE_API_URL_PROD;
+
+// useEffect(() => {
+//   if (userDetails.id) {
+//     const socket = io(BASE_URL, {
+//       query: { userId: userDetails.id },
+//     });
+
+//     socketRef.current = socket;
+
+//     socket.on('getOnlineUsers', (onlineUsers) => {
+//       dispatch(setOnlineUsers(onlineUsers));
+//     });
+
+//     socket.on('videoCallOffer', async ({ from, offer }) => {
+//       if (offer.type === 'offer') {
+//         navigate(`/call/${from}`);
+//       }
+//     });
+
+//     return () => {
+//       socket.disconnect();
+//       dispatch(setOnlineUsers([]));
+//     };
+//   }
+// }, [userDetails, dispatch, navigate]);
