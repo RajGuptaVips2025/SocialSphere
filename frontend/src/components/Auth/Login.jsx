@@ -52,7 +52,7 @@ const Login = () => {
         toast.error('No authorization code received');
       }
     } catch (err) {
-      console.error('Google login error:', err);
+      console.error('Google login error:', err.message);
       toast.error('Google login failed');
     }
   };
