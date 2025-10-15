@@ -1,5 +1,5 @@
 import { e as effectInit } from '../shared/effect-init.mjs';
-import { c as createElement, o as getRotateFix } from '../shared/utils.mjs';
+import { c as createElement, p as getRotateFix } from '../shared/utils.mjs';
 
 function EffectCube(_ref) {
   let {

@@ -1,3 +1,5 @@
+import { s as setInnerHTML } from '../shared/utils.mjs';
+
 function appendSlide(slides) {
   const swiper = this;
   const {
@@ -10,9 +12,9 @@ function appendSlide(slides) {
   const appendElement = slideEl => {
     if (typeof slideEl === 'string') {
       const tempDOM = document.createElement('div');
-      tempDOM.innerHTML = slideEl;
+      setInnerHTML(tempDOM, slideEl);
       slidesEl.append(tempDOM.children[0]);
-      tempDOM.innerHTML = '';
+      setInnerHTML(tempDOM, '');
     } else {
       slidesEl.append(slideEl);
     }
@@ -47,9 +49,9 @@ function prependSlide(slides) {
   const prependElement = slideEl => {
     if (typeof slideEl === 'string') {
       const tempDOM = document.createElement('div');
-      tempDOM.innerHTML = slideEl;
+      setInnerHTML(tempDOM, slideEl);
       slidesEl.prepend(tempDOM.children[0]);
-      tempDOM.innerHTML = '';
+      setInnerHTML(tempDOM, '');
     } else {
       slidesEl.prepend(slideEl);
     }

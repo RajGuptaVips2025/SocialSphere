@@ -1,6 +1,6 @@
 /*!
- * Engine.IO v6.6.1
- * (c) 2014-2024 Guillermo Rauch
+ * Engine.IO v6.6.3
+ * (c) 2014-2025 Guillermo Rauch
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -2010,6 +2010,7 @@
     };
     _proto.doClose = function doClose() {
       if (typeof this.ws !== "undefined") {
+        this.ws.onerror = function () {};
         this.ws.close();
         this.ws = null;
       }

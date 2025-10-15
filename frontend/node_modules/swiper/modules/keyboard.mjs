@@ -1,5 +1,5 @@
 import { g as getDocument, a as getWindow } from '../shared/ssr-window.esm.mjs';
-import { a as elementParents, b as elementOffset } from '../shared/utils.mjs';
+import { b as elementParents, d as elementOffset } from '../shared/utils.mjs';
 
 /* eslint-disable consistent-return */
 function Keyboard(_ref) {
@@ -46,7 +46,7 @@ function Keyboard(_ref) {
     if (e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) {
       return undefined;
     }
-    if (document.activeElement && document.activeElement.nodeName && (document.activeElement.nodeName.toLowerCase() === 'input' || document.activeElement.nodeName.toLowerCase() === 'textarea')) {
+    if (document.activeElement && (document.activeElement.isContentEditable || document.activeElement.nodeName && (document.activeElement.nodeName.toLowerCase() === 'input' || document.activeElement.nodeName.toLowerCase() === 'textarea'))) {
       return undefined;
     }
     if (swiper.params.keyboard.onlyInViewport && (isPageUp || isPageDown || isArrowLeft || isArrowRight || isArrowUp || isArrowDown)) {

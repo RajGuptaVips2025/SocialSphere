@@ -1,3 +1,5 @@
+import { s as setInnerHTML } from './utils.mjs';
+
 /* underscore in name -> watch for changes */
 const paramsList = ['eventsPrefix', 'injectStyles', 'injectStylesUrls', 'modules', 'init', '_direction', 'oneWayMovement', 'swiperElementNodeName', 'touchEventsTarget', 'initialSlide', '_speed', 'cssMode', 'updateOnWindowResize', 'resizeObserver', 'nested', 'focusableElements', '_enabled', '_width', '_height', 'preventInteractionOnTransition', 'userAgent', 'url', '_edgeSwipeDetection', '_edgeSwipeThreshold', '_freeMode', '_autoHeight', 'setWrapperSize', 'virtualTranslate', '_effect', 'breakpoints', 'breakpointsBase', '_spaceBetween', '_slidesPerView', 'maxBackfaceHiddenSlides', '_grid', '_slidesPerGroup', '_slidesPerGroupSkip', '_slidesPerGroupAuto', '_centeredSlides', '_centeredSlidesBounds', '_slidesOffsetBefore', '_slidesOffsetAfter', 'normalizeSlideIndex', '_centerInsufficientSlides', '_watchOverflow', 'roundLengths', 'touchRatio', 'touchAngle', 'simulateTouch', '_shortSwipes', '_longSwipes', 'longSwipesRatio', 'longSwipesMs', '_followFinger', 'allowTouchMove', '_threshold', 'touchMoveStopPropagation', 'touchStartPreventDefault', 'touchStartForcePreventDefault', 'touchReleaseOnEdges', 'uniqueNavElements', '_resistance', '_resistanceRatio', '_watchSlidesProgress', '_grabCursor', 'preventClicks', 'preventClicksPropagation', '_slideToClickedSlide', '_loop', 'loopAdditionalSlides', 'loopAddBlankSlides', 'loopPreventsSliding', '_rewind', '_allowSlidePrev', '_allowSlideNext', '_swipeHandler', '_noSwiping', 'noSwipingClass', 'noSwipingSelector', 'passiveListeners', 'containerModifierClass', 'slideClass', 'slideActiveClass', 'slideVisibleClass', 'slideFullyVisibleClass', 'slideNextClass', 'slidePrevClass', 'slideBlankClass', 'wrapperClass', 'lazyPreloaderClass', 'lazyPreloadPrevNext', 'runCallbacksOnInit', 'observer', 'observeParents', 'observeSlideChildren',
 // modules
@@ -198,14 +200,14 @@ function updateSwiper(_ref) {
       if (!nextEl || typeof nextEl === 'string') {
         nextEl = document.createElement('div');
         nextEl.classList.add('swiper-button-next');
-        nextEl.innerHTML = swiper.hostEl.constructor.nextButtonSvg;
+        setInnerHTML(nextEl, swiper.hostEl.constructor.nextButtonSvg);
         nextEl.part.add('button-next');
         swiper.el.appendChild(nextEl);
       }
       if (!prevEl || typeof prevEl === 'string') {
         prevEl = document.createElement('div');
         prevEl.classList.add('swiper-button-prev');
-        prevEl.innerHTML = swiper.hostEl.constructor.prevButtonSvg;
+        setInnerHTML(prevEl, swiper.hostEl.constructor.prevButtonSvg);
         prevEl.part.add('button-prev');
         swiper.el.appendChild(prevEl);
       }

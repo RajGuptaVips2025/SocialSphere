@@ -1,3 +1,13 @@
+## 1.8.2 (2025-04-22)
+
+### Bug fixes
+
+Make sure the drop cursor is positioned in the right place when the editor is scaled with a CSS transform.
+
+Fix the width of the cursor when in a transformed element. Fix incorrect check in dragleave handler
+
+Fix an issue where the dropcursor would hide when drag moved over the top editor element.
+
 ## 1.8.1 (2023-05-17)
 
 ### Bug fixes

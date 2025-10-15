@@ -1,6 +1,6 @@
 import { g as getDocument } from '../shared/ssr-window.esm.mjs';
 import { c as classesToSelector } from '../shared/classes-to-selector.mjs';
-import { c as createElement, h as elementIndex, m as makeElementsArray } from '../shared/utils.mjs';
+import { c as createElement, i as elementIndex, m as makeElementsArray, s as setInnerHTML } from '../shared/utils.mjs';
 
 function A11y(_ref) {
   let {
@@ -37,8 +37,7 @@ function A11y(_ref) {
   function notify(message) {
     const notification = liveRegion;
     if (notification.length === 0) return;
-    notification.innerHTML = '';
-    notification.innerHTML = message;
+    setInnerHTML(notification, message);
   }
   function getRandomNumber(size) {
     if (size === void 0) {
@@ -237,9 +236,9 @@ function A11y(_ref) {
     requestAnimationFrame(() => {
       if (preventFocusHandler) return;
       if (swiper.params.loop) {
-        swiper.slideToLoop(parseInt(slideEl.getAttribute('data-swiper-slide-index')), 0);
+        swiper.slideToLoop(swiper.getSlideIndexWhenGrid(parseInt(slideEl.getAttribute('data-swiper-slide-index'))), 0);
       } else {
-        swiper.slideTo(swiper.slides.indexOf(slideEl), 0);
+        swiper.slideTo(swiper.getSlideIndexWhenGrid(swiper.slides.indexOf(slideEl)), 0);
       }
       preventFocusHandler = false;
     });

@@ -7,7 +7,7 @@ export declare function addedIn(emoji: DataEmoji): number;
 export declare function emojiName(emoji?: WithName): string;
 export declare function unifiedWithoutSkinTone(unified: string): string;
 export declare function emojiUnified(emoji: DataEmoji, skinTone?: string): string;
-export declare function emojisByCategory(category: Categories): DataEmojis;
+export declare function useGetEmojisByCategory(): (Category: Categories) => DataEmojis;
 export declare function emojiUrlByUnified(unified: string, emojiStyle: EmojiStyle): string;
 export declare function emojiVariations(emoji: DataEmoji): string[];
 export declare function emojiHasVariations(emoji: DataEmoji): boolean;

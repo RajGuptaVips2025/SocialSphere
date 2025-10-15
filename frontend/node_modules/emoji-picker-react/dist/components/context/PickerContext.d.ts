@@ -18,6 +18,7 @@ export declare function useIsPastInitialLoad(): boolean;
 export declare function useEmojiVariationPickerState(): ReactState<DataEmoji | null>;
 export declare function useSkinToneFanOpenState(): ReactState<boolean>;
 export declare function useDisallowedEmojisRef(): React.MutableRefObject<Record<string, boolean>>;
+export declare function useVisibleCategoriesState(): ReactState<string[]>;
 export declare function useUpdateSuggested(): [number, () => void];
 export declare type FilterState = Record<string, FilterDict>;
 export {};

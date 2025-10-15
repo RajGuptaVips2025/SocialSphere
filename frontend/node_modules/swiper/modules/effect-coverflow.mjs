@@ -1,7 +1,7 @@
 import { c as createShadow } from '../shared/create-shadow.mjs';
 import { e as effectInit } from '../shared/effect-init.mjs';
 import { e as effectTarget } from '../shared/effect-target.mjs';
-import { g as getSlideTransformEl, o as getRotateFix } from '../shared/utils.mjs';
+import { g as getSlideTransformEl, p as getRotateFix } from '../shared/utils.mjs';
 
 function EffectCoverflow(_ref) {
   let {

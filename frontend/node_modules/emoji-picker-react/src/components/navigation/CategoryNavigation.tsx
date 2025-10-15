@@ -11,13 +11,15 @@ import { useScrollCategoryIntoView } from '../../hooks/useScrollCategoryIntoView
 import { useShouldHideCustomEmojis } from '../../hooks/useShouldHideCustomEmojis';
 import { isCustomCategory } from '../../typeRefinements/typeRefinements';
 import { useCategoryNavigationRef } from '../context/ElementRefContext';
+import { useVisibleCategoriesState } from '../context/PickerContext';
 
 import { CategoryButton } from './CategoryButton';
 
 export function CategoryNavigation() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [, setVisibleCategories] = useVisibleCategoriesState();
   const scrollCategoryIntoView = useScrollCategoryIntoView();
-  useActiveCategoryScrollDetection(setActiveCategory);
+  useActiveCategoryScrollDetection({ setActiveCategory, setVisibleCategories });
   const isSearchMode = useIsSearchMode();
 
   const categoriesConfig = useCategoriesConfig();
@@ -50,8 +52,10 @@ export function CategoryNavigation() {
             allowNavigation={allowNavigation}
             categoryConfig={categoryConfig}
             onClick={() => {
-              setActiveCategory(category);
               scrollCategoryIntoView(category);
+              setTimeout(() => {
+                setActiveCategory(category);
+              }, 10);
             }}
           />
         );

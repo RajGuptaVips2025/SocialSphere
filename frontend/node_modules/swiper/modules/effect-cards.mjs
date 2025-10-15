@@ -116,7 +116,10 @@ function EffectCards(_ref) {
     setTransition,
     perspective: () => true,
     overwriteParams: () => ({
+      _loopSwapReset: false,
       watchSlidesProgress: true,
+      loopAdditionalSlides: swiper.params.cardsEffect.rotate ? 3 : 2,
+      centeredSlides: true,
       virtualTranslate: !swiper.params.cssMode
     })
   });

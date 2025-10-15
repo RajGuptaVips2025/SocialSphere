@@ -1,1 +1,4 @@
-export declare function useActiveCategoryScrollDetection(setActiveCategory: (category: string) => void): void;
+export declare function useActiveCategoryScrollDetection({ setActiveCategory, setVisibleCategories }: {
+    setActiveCategory: (category: string) => void;
+    setVisibleCategories: (categories: string[]) => void;
+}): void;
