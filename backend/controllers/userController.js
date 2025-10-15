@@ -100,9 +100,10 @@ const getFollowing = async (req, res) => {
 
 const following = async (req, res) => {
   try {
+    console.log(req.params.id);
     const user = await User.findById(req.params.id).select('-password');
     const followingUser = await User.findById(req.body.followingID);
-
+console.log(user)
     if (!user || !followingUser) {
       return res.status(404).json({ error: 'User not found' });
     }
