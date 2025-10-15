@@ -1,18 +1,19 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import { useEffect, useRef, useState } from "react";
 import { FaHeart } from "react-icons/fa";
 import { GoBookmark, GoBookmarkFill } from "react-icons/go";
 import CommentForm from "./CommentForm";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { Heart, MessageCircle, MoreHorizontal, Send, Volume2, VolumeX } from "lucide-react";
+import { Heart, MessageCircle, MoreHorizontal, Volume2, VolumeX } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
+import { motion } from "framer-motion";
 
 const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handleSavePosts, showComments, handleFollowing, handleCommentSubmit, handleDeletePost }) => {
-  // console.log(post)
-
   const videoRef = useRef(null);
 
   const [isMuted, setIsMuted] = useState(true)
@@ -57,8 +58,15 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
       }
     };
   }, [videoRef]);
+
+  // The entire post component is wrapped in motion.div for animation.
   return (
-    <div className="space-y-8 mb-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-8 mb-4"
+    >
       <Card key={post._id} className="w-full border-t-0 border-x-0 rounded-none border-b-[.1px] border-zinc-300 shadow-none">
         <CardHeader className="flex flex-row items-center space-x-4 px-0 py-4">
           <Link to={`/profile/${post?.author?.username}`}>
@@ -73,7 +81,7 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                 <p className="text-sm font-semibold">{post?.author?.username}</p>
               </Link>
               <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                {post?.author?.username} song
+                {post?.author?.username}
               </p>
             </div>
             <button onClick={(e) => handleFollowing(e, post.author._id)}>
@@ -88,43 +96,62 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                 <MoreHorizontal className="w-5 h-5" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-96">
-              <DropdownMenuItem className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer">Report</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {userDetails?.id == post?.author?._id &&
-                <>
-                  <DropdownMenuItem onClick={e => handleDeletePost(e, post?._id)} className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer">Delete</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              }
-              {followingUserss?.includes(post.author._id) && (
-                <>
-                  <DropdownMenuItem
-                    onClick={(e) => handleFollowing(e, post.author._id)}
-                    className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer"
-                  >
-                    Unfollow
+
+            <DropdownMenuContent
+              asChild
+              align="end"
+              className="w-96 border border-zinc-200 dark:border-zinc-800 shadow-lg"
+            >
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              >
+
+
+                {userDetails?.id === post?.author?._id && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={(e) => handleDeletePost(e, post?._id)}
+                      className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer"
+                    >
+                      Delete
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
+                {followingUserss?.includes(post.author._id) && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={(e) => handleFollowing(e, post.author._id)}
+                      className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer"
+                    >
+                      Unfollow
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+
+                <Link to={`/profile/${post?.author?.username}/${post.caption}`}>
+                  <DropdownMenuItem className="justify-center cursor-pointer">
+                    Go to post
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              <DropdownMenuItem className="justify-center cursor-pointer">Add to favorites</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <Link to={`/profile/${post?.author?.username}/${post.caption}`}>
-                <DropdownMenuItem className="justify-center cursor-pointer">Go to post</DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center cursor-pointer">Share to...</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center cursor-pointer">Copy link</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center cursor-pointer">Embed</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <Link to={`/profile/${post?.author?.username}`}>
-                <DropdownMenuItem className="justify-center cursor-pointer">About this account</DropdownMenuItem>
-              </Link>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center cursor-pointer">Cancel</DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+
+                <Link to={`/profile/${post?.author?.username}`}>
+                  <DropdownMenuItem className="justify-center cursor-pointer">
+                    Go to this account
+                  </DropdownMenuItem>
+                </Link>
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem className="justify-center cursor-pointer">
+                  Cancel
+                </DropdownMenuItem>
+              </motion.div>
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
@@ -141,6 +168,7 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                           {mediaItem?.mediaType === 'video' ? (
                             <>
                               <video
+                                ref={videoRef}
                                 src={`${mediaItem?.mediaPath}`}
                                 className="w-full h-full aspect-square object-contain"
                                 loop
@@ -186,6 +214,7 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
               {post?.media[0]?.mediaType === 'video' ? (
                 <>
                   <video
+                    ref={videoRef}
                     src={`${post?.media[0]?.mediaPath}`}
                     className="w-full h-full aspect-square object-contain"
                     loop
@@ -219,41 +248,82 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
           )
         }
         <CardFooter className="flex flex-col items-start px-0 py-4 space-y-2">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex space-x-2">
-              <button onClick={(e) => handleLike(e, post._id)} variant="ghost" size="icon">
-                {post?.likes?.includes(userDetails.id) ? <FaHeart className="w-6 h-6 text-red-500" /> : <Heart className="w-6 h-6 hover:scale-110 transition-transform" />}
-              </button>
-              <Button onClick={(e) => showComments(e, post)} variant="ghost" size="icon">
-                <MessageCircle className="w-6 h-6 -rotate-90" />
-              </Button>
-              <Button variant="ghost" size="icon">
-                <Send className="w-6 h-6" />
-              </Button>
-            </div>
-            <button onClick={(e) => handleSavePosts(e, post._id)} variant="ghost" size="icon">
-              {Array.isArray(savedPost) && savedPost.includes(post._id) ? <GoBookmarkFill size={25} className="dark:text-white" /> : <GoBookmark size={25} className="hover:text-zinc-800 dark:hover:text-zinc-500 transition-colors dark:text-white duration-100" />}
-            </button>
-          </div>
-          <p className="text-sm font-semibold">
-            {post?.likes?.length > 0 ? `${post?.likes?.length} likes` : ""}
-          </p>
-          <div className="text-sm">
-            <p className="font-semibold">
-              {post?.caption}
-            </p>
-            This is a sample caption for post . #instagram #clone
-          </div>
-          <button onClick={(e) => showComments(e, post)}
-            className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-zinc-700"
+          <motion.div
+            className="flex items-center justify-between w-full"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            {post?.comments?.length > 0 ? `View all ${post?.comments?.length} comments` : ""}
-          </button>
+            <div className="flex space-x-2">
+              <motion.button
+                onClick={(e) => handleLike(e, post._id)}
+                whileTap={{ scale: 0.85 }}
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                {post?.likes?.includes(userDetails.id) ? (
+                  <FaHeart className="w-6 h-6 text-red-500" />
+                ) : (
+                  <Heart className="w-6 h-6 hover:scale-110 transition-transform" />
+                )}
+              </motion.button>
+
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  onClick={(e) => showComments(e, post)}
+                  variant="ghost"
+                  size="icon"
+                >
+                  <MessageCircle className="w-6 h-6 -rotate-90" />
+                </Button>
+              </motion.div>
+            </div>
+
+            {/* <motion.button
+              onClick={(e) => handleSavePosts(e, post._id)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              {Array.isArray(savedPost) && savedPost.includes(post._id) ? (
+                <GoBookmarkFill
+                  size={25}
+                  className="dark:text-white transition-transform"
+                />
+              ) : (
+                <GoBookmark
+                  size={25}
+                  className="hover:text-zinc-800 dark:hover:text-zinc-500 transition-colors dark:text-white duration-100"
+                />
+              )}
+            </motion.button> */}
+          </motion.div>
+
+          <motion.p
+            className="text-sm font-semibold"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.3 }}
+          >
+            {post?.likes?.length > 0 ? `${post?.likes?.length} likes` : ""}
+          </motion.p>
+
+          <motion.button
+            onClick={(e) => showComments(e, post)}
+            className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-zinc-700"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35, duration: 0.3 }}
+            whileHover={{ scale: 1.02, x: 3 }}
+          >
+            {post?.comments?.length > 0
+              ? `View all ${post?.comments?.length} comments`
+              : ""}
+          </motion.button>
         </CardFooter>
         <CommentForm postId={post._id} handleCommentSubmit={handleCommentSubmit} />
       </Card>
-    </div>
-
+    </motion.div>
   );
 };
 

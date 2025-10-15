@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import Sidebar from './Sidebar';
-import SuggestedUsers from './SuggestedUsers';
-// import axios from 'axios';
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setSavedPosts, setFollowing, setFollower, setSelectedPost, setRtmNotification } from '@/features/userDetail/userDetailsSlice'; // Adjust paths as necessary
 import PostComment from './PostComment';
@@ -185,47 +183,40 @@ const Home = ({ socketRef }) => {
   }, [socketRef, userDetails, dispatch]);
 
 
-  return (<div className='dark:bg-neutral-950 dark:text-white'>
-    <div className="flex bg-white dark:bg-neutral-950 min-h-screen">
-      {/* <Sidebar /> */}
-      <PostComment selectedMedia={selectedMedia} isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
-      {/* <main className="flex-1 ml-64 flex justify-center"> */}
-      <main className="flex-1 md:ml-[72px] lg:ml-60">
-        {/* <div className="max-w-2xl w-full py-3 px-4"> */}
-        <div className="max-w-screen-xl mt-14 md:mt-0 mx-auto py-2 md:px-6 lg:px-8">
-          <div className="flex gap-0">
-            <div className="flex-1 max-w-[630px]">
-              <Stories />
-              {/* Posts */}
-              <section className="mt-2 mx-auto sm:w-[80vw] md:w-[60vw] lg:w-[468px]">
-                {allPosts.map((post) => (
-                  <Post
-                    key={post._id}
-                    post={post}
-                    userDetails={userDetails}
-                    savedPost={savedPosts}
-                    followingUserss={followingUserss}
-                    handleLike={handleLike}
-                    handleSavePosts={handleSavePosts}
-                    showComments={showComments}
-                    handleFollowing={handleFollowing}
-                    handleCommentSubmit={handleCommentSubmit}
-                    handleDeletePost={handleDeletePost}
-                  />
-                ))}
+  return (
+    <div className='dark:bg-neutral-950 dark:text-white'>
+      <div className="flex bg-white dark:bg-neutral-950 min-h-screen">
+        <PostComment selectedMedia={selectedMedia} isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
+        <main className="flex justify-center w-full pt-20 md:pt-16 px-2">
+          <div className="w-full max-w-[500px] flex flex-col items-center">
+            <Stories />
+            <section className="mt-4 w-full flex flex-col items-center">
+              {allPosts.map((post) => (
+                <Post
+                  key={post._id}
+                  post={post}
+                  userDetails={userDetails}
+                  savedPost={savedPosts}
+                  followingUserss={followingUserss}
+                  handleLike={handleLike}
+                  handleSavePosts={handleSavePosts}
+                  showComments={showComments}
+                  handleFollowing={handleFollowing}
+                  handleCommentSubmit={handleCommentSubmit}
+                  handleDeletePost={handleDeletePost}
+                />
+              ))}
 
-                {isLoading && <InstagramSkeletonComponent />}
-                {!hasMore && <div>No more posts to load</div>}
-              </section>
-            </div>
-            <SuggestedUsers />
+              {isLoading && <InstagramSkeletonComponent />}
+              {!hasMore && <div className="text-center mt-4 text-gray-400">No more posts to load</div>}
+            </section>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
-  </div>
 
   );
 };
 
 export default Home;
+

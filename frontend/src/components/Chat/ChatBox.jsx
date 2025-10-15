@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { setMessages, setSuggestedUser } from '../../features/userDetail/userDetailsSlice';
-// import api from 'api';
 import { AiOutlineMessage } from 'react-icons/ai';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
@@ -10,30 +10,24 @@ import { Camera, Info, Phone, Smile, Video, X } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { ReloadIcon } from '@radix-ui/react-icons';
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogHeader, DialogTitle, DialogFooter } from "../ui/dialog";
-import VideoCall from './VideoCall';
 import EmojiPicker from "emoji-picker-react";
 import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
-import { useParams } from "react-router-dom";
-import { toast } from "react-toastify";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import api from '@/api/api';
 
 function ChatBox() {
     let suggestedUser = useSelector((state) => state.counter.suggestedUser);
-    // console.log(suggestedUser);
     const [groupMembers, setGroupMembers] = useState([]);
     const [isAdmin, setIsAdmin] = useState([]);
 
-    // console.log(groupMembers);
-    // Fetch and set group members when `suggestedUser` changes
     useEffect(() => {
         const members =
             suggestedUser?.members?.map((member) => ({
-                _id: member.userId._id,
-                username: member.userId.username,
-                profilePic: member.userId.profilePicture || "/default-avatar.png",
+                _id: member._id, // Fallback to member._id for safety
+                username: member.username, // Fallback username
+                profilePic: member.userId?.profilePicture || member.profilePicture, // Fallback profile picture
                 role: member.role,
             })) || [];
         const adminId = members.find((item) => item.role === "admin")?._id;
@@ -70,8 +64,7 @@ function ChatBox() {
 
         try {
             const groupId = suggestedUser._id;
-            // Replace `/api/group/${groupId}/rename` with your actual backend endpoint
-            const response = await api.put(`/conversations/group/update/groupName/${groupId}`, {
+            await api.put(`/conversations/group/update/groupName/${groupId}`, {
                 groupName: newGroupName.trim(),
             });
 
@@ -206,7 +199,6 @@ function ChatBox() {
 
             for (const userId of members) {
                 const response = await api.put(`/conversations/group/add/member/${groupId}`, { userId });
-                // console.log(`Added user ${userId}:`, response.data);
                 setGroupMembers((prevGroupMembers) => [
                     ...prevGroupMembers,
                     response.data.newUser
@@ -225,13 +217,12 @@ function ChatBox() {
             const groupId = suggestedUser._id; // Ensure this is the correct group ID
 
             // Send request to remove member
-            const response = await api.put(`/conversations/group/remove/member/${groupId}`, {
+            await api.put(`/conversations/group/remove/member/${groupId}`, {
                 userId,
             });
             // Update state dynamically to remove the member from the list at runtime
             setGroupMembers((prevMembers) => {
                 const updatedMembers = prevMembers.filter((member) => member._id != userId);
-                // console.log("Updated members:", updatedMembers); // Log to ensure state is updating
                 return updatedMembers;
             });
 
@@ -242,7 +233,6 @@ function ChatBox() {
     };
     return (
         <>
-            {/* <VideoCall userId={userDetails?.id} socketRef={socketRef} remoteUserId={suggestedUser?._id}  /> */}
             {suggestedUser ?
                 (<div className={`flex-grow ${suggestedUser ? "w-[90vw] md:w-full" : "w-0"} flex flex-col max-h-screen bg-white dark:bg-neutral-950 dark:text-white`}>
                     <div
@@ -256,19 +246,10 @@ function ChatBox() {
                             <div>
                                 <Link to={`/profile/${suggestedUser?.username}`}>
                                     <p className="font-semibold text-xs md:text-sm dark:text-white">{suggestedUser && 'groupName' in suggestedUser ? suggestedUser?.groupName : suggestedUser?.username}</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Active 1h ago</p>
                                 </Link>
                             </div>
                         </div>
                         <div className="flex">
-                            {/* Add your content here */}
-                            <Button variant="ghost" size="sm" className="text-black dark:text-white">
-                                <Phone className="h-6 w-6" />
-                            </Button>
-                            <Button onClick={() => navigate(`/call/${suggestedUser?._id}`)} variant="ghost" size="sm" className="text-black dark:text-white">
-                                <Video className="h-7 w-7" />
-                            </Button>
-
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <Button variant="ghost" size="sm" className="text-black dark:text-white hidden md:block">
@@ -356,7 +337,7 @@ function ChatBox() {
                                                         Delete Chat
                                                     </Button>
                                                     <p className="text-xs text-gray-500">
-                                                        You won't be able to send or receive messages unless someone adds you back to the chat. No one will be notified that you left the chat.
+                                                        You won&#39;t be able to send or receive messages unless someone adds you back to the chat. No one will be notified that you left the chat.
                                                     </p>
                                                 </div>
 
@@ -482,7 +463,7 @@ function ChatBox() {
                         </div>
                         {messages && Array.isArray(messages) && messages?.map((message, index) => (
                             <div
-                                key={index}
+                                key={message._id}
                                 className={`flex ${message.senderId?._id === userDetails.id || message.senderId === userDetails.id
                                     ? "justify-end"
                                     : "justify-start"
@@ -534,7 +515,6 @@ function ChatBox() {
                             </div>
                         ))}
                         <div ref={messagesEndRef} />
-                        {/* Dialog for displaying media */}
                         {selectedMedia && (
                             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger className="hidden" />
@@ -588,8 +568,6 @@ function ChatBox() {
                                 onSubmit={(e) => sendMessageHandle(e, suggestedUser._id)}
                                 className="flex items-center space-x-2 md:space-x-4 border border-zinc-800 bg-transparent rounded-full px-4 py-2"
                             >
-                                {/* <Smile className="h-6 w-6 text-black dark:text-white" /> */}
-                                {/* Smile Icon */}
                                 <div className="relative">
                                     <Smile
                                         onClick={() => setShowEmojiPicker((prev) => !prev)}

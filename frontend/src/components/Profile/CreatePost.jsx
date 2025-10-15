@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Input } from '../ui/input';
@@ -32,7 +31,7 @@ const CreatePost = () => {
 
     try {
       setIsResOk(false);
-      const response = await api.post('/posts/create', formData, {
+      await api.post('/posts/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

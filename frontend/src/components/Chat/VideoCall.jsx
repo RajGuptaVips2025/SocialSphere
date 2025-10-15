@@ -1,7 +1,9 @@
-
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '../ui/button';
+// import { Camera, Mic, PhoneOff, Settings } from "lucide-react"
 import { Camera, CameraOff, Mic, MicOff, PhoneOff, Settings } from "lucide-react"
 
 const VideoCall = ({ userId, socketRef }) => {
@@ -21,6 +23,7 @@ const VideoCall = ({ userId, socketRef }) => {
   useEffect(() => {
     // Ensure that the socket listeners are set up when the component mounts
     socketRef.current.on('videoCallOffer', async ({ from, offer }) => {
+      console.log('Received videoCallOffer from:', offer.type);
       setCreateOffer(offer);
       setForm(from);
       if (offer.type == 'offer') {
@@ -31,18 +34,21 @@ const VideoCall = ({ userId, socketRef }) => {
 
     socketRef.current.on('videoCallAnswer', async ({ from, answer }) => {
       setshowVideoCall(true)
+      console.log('Received videoCallAnswer from:', from);
       if (peerConnection.current) {
         await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
       }
     });
 
     socketRef.current.on('iceCandidate', async ({ from, candidate }) => {
+      console.log('Received ICE candidate from:', from, candidate);
       if (!peerConnection.current) {
         console.error('Peer connection is not initialized');
         return;
       }
       try {
         await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+        console.log('ICE candidate added successfully');
       } catch (error) {
         console.error('Error adding ICE candidate:', error);
       }
@@ -50,7 +56,7 @@ const VideoCall = ({ userId, socketRef }) => {
 
 
     socketRef.current.on('endCall', ({ from }) => {
-      // console.log('Call ended by user:', from);
+      console.log('Call ended by user:', from);
 
       // Close the peer connection and stop the local stream
       if (peerConnection.current) {
@@ -81,9 +87,12 @@ const VideoCall = ({ userId, socketRef }) => {
     peerConnection.current = new RTCPeerConnection();
 
     // Get local video and audio
+    // const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    // localVideoRef.current.srcObject = localStream;
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     localVideoRef.current.srcObject = localStreamRef.current;
 
+    // localStream.getTracks().forEach(track => peerConnection.current.addTrack(track, localStream));
     localStreamRef.current.getTracks().forEach(track => peerConnection.current.addTrack(track, localStreamRef.current));
 
     peerConnection.current.ontrack = (event) => {
@@ -108,9 +117,12 @@ const VideoCall = ({ userId, socketRef }) => {
     setshowVideoCall(true)
     peerConnection.current = new RTCPeerConnection();
 
+    const localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localVideoRef.current.srcObject = localStream;
     localStreamRef.current = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     localVideoRef.current.srcObject = localStreamRef.current;
 
+    localStream.getTracks().forEach(track => peerConnection.current.addTrack(track, localStream));
     localStreamRef.current.getTracks().forEach(track => peerConnection.current.addTrack(track, localStreamRef.current));
 
     peerConnection.current.ontrack = (event) => {
@@ -188,11 +200,12 @@ const VideoCall = ({ userId, socketRef }) => {
             <h3 className="text-white text-xl font-bold mb-1">Khushi Barman</h3>
             <p className="text-white text-sm mb-6">Ready to call?</p>
 
-            {/* Show "Start Call" for caller and "Join Call" for receiver */}
+          \
             {isAnswer ? (
             <Button onClick={() => handleVideoCallOffer(form, createOffer)} className="dark:bg-green-500 dark:hover:bg-green-600 dark:text-white px-4 py-0 rounded-full">
               Join Call
             </Button>
+         
             ) : (
             <Button onClick={startCall} className="dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white px-4 py-0 rounded-full">
               Start Call

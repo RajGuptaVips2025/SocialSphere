@@ -1,7 +1,7 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { GoBookmark, GoBookmarkFill } from 'react-icons/go';
 import { BsThreeDots } from "react-icons/bs";
-// import axios from 'axios';
 import { Button } from '../ui/button';
 import { Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-react';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
@@ -10,9 +10,10 @@ import { setSavedPosts, setWatchHistory } from '@/features/userDetail/userDetail
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '../ui/carousel';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from '../ui/drawer';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '../ui/drawer';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import api from '@/api/api';
+import { motion } from "framer-motion";
 
 const ReelSection = () => {
     const userDetails = useSelector((state) => state.counter.userDetails);
@@ -40,7 +41,6 @@ const ReelSection = () => {
             const videoPosts = posts.map(post => {
                 // Filter the media array to include only videos
                 const videoMedia = post.media.filter(mediaItem => mediaItem.mediaType === "video");
-
 
                 // If there are video media items, return the post with only video media, else return null
                 if (videoMedia.length > 0) {
@@ -228,234 +228,141 @@ const ReelSection = () => {
     useEffect(() => {
         getSavePosts();
     }, [getSavePosts]);
+
+     // Animation Variants
+    const reelVariant = {
+        hidden: { opacity: 0, y: 50 },
+        visible: (i) => ({
+            opacity: 1,
+            y: 0,
+            transition: { delay: i * 0.15, duration: 0.6, ease: "easeOut" }
+        })
+    };
+
+    const fadeUp = {
+        hidden: { opacity: 0, y: 10 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.3 } }
+    };
+
+    const buttonAnim = {
+        whileHover: { scale: 1.2 },
+        whileTap: { scale: 0.9 },
+        transition: { type: "spring", stiffness: 300 }
+    };
+    
     return (
         <>
-            {/* <Sidebar /> */}
-            <div className="flex-1 min-h-screen flex flex-col items-center py-4 md:ml-[72px] lg:ml-60 ml-auto dark:bg-neutral-950 dark:text-white">
-                <div className="w-full flex justify-center mt-4">
-                    <Carousel
-                        opts={{
-                            align: "center", // Center the current reel, partially showing adjacent reels
-                        }}
-                        orientation="vertical"
-                        className="relative w-full max-w-sm md:max-w-md lg:max-w-lg"
-                    >
-                        <CarouselContent className="h-[95vh] gap-4">
-                            {allPosts?.map((post, index) => (
-                                <CarouselItem
-                                    key={post._id}
-                                    className="relative flex flex-col items-center justify-center w-full h-[75vh] gap-4 rounded-lg overflow-hidden"
-                                >
-                                    {/* Post Content */}
+        <div className="flex-1 min-h-screen flex flex-col items-center pt-24 pb-4 dark:bg-neutral-950 dark:text-white">
+            <div className="w-full flex justify-center mt-4">
+                <Carousel opts={{ align: "center" }} orientation="vertical" className="relative w-full max-w-sm md:max-w-md lg:max-w-lg">
+                    <CarouselContent className="h-[95vh] gap-4">
+                        {allPosts?.map((post, index) => (
+                            <motion.div
+                                key={post._id}
+                                variants={reelVariant}
+                                initial="hidden"
+                                animate="visible"
+                                custom={index}
+                            >
+                                <CarouselItem className="relative flex flex-col items-center justify-center w-full h-[75vh] gap-4 rounded-lg overflow-hidden">
                                     <div className="w-[300px] h-full rounded-lg shadow-lg overflow-hidden">
-                                        <div className="video w-full h-full relative rounded-lg overflow-hidden">
+                                        <motion.div
+                                            className="video w-full h-full relative rounded-lg overflow-hidden"
+                                            variants={fadeUp}
+                                            initial="hidden"
+                                            animate="visible"
+                                        >
                                             <video
-                                                ref={(el) => (videoRefs.current[index] = el)} // Assign ref to each video
+                                                ref={(el) => (videoRefs.current[index] = el)}
                                                 muted
-                                                data-postid={post._id} // Store postId for reference in intersection observer
+                                                data-postid={post._id}
                                                 src={post?.media[0]?.mediaPath}
                                                 loop
                                                 className="object-cover w-full h-full"
                                             />
                                             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
-                                                {/* Author Info */}
-                                                <div className="flex items-center gap-2 mb-2">
+                                                <motion.div
+                                                    className="flex items-center gap-2 mb-2"
+                                                    variants={fadeUp}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                    transition={{ delay: 0.4 }}
+                                                >
                                                     <Link
                                                         to={`/profile/${post?.author?.username}/${post.caption}`}
                                                         className="flex items-center"
                                                     >
                                                         <Avatar className="w-8 h-8">
-                                                            <AvatarImage
-                                                                src={post?.author?.profilePicture}
-                                                                alt={post?.username}
-                                                                className="object-cover w-full h-full rounded-full"
-                                                            />
+                                                            <AvatarImage src={post?.author?.profilePicture} alt={post?.username} className="object-cover w-full h-full rounded-full" />
                                                             <AvatarFallback>{post?.username}</AvatarFallback>
                                                         </Avatar>
-                                                        <span className="ml-2 text-white text-sm">
-                                                            {post?.author?.username}
-                                                        </span>
+                                                        <span className="ml-2 text-white text-sm">{post?.author?.username}</span>
                                                     </Link>
-                                                    <Button
-                                                        variant="outline"
-                                                        className="ml-2 px-4 py-1 text-xs text-white bg-transparent border"
-                                                    >
-                                                        Follow
-                                                    </Button>
-                                                </div>
-                                                {/* Caption */}
-                                                <p className="text-white text-sm mb-2">{post.caption}</p>
-                                                {/* Song Info */}
-                                                <div className="flex items-center text-white">
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        width="20"
-                                                        height="20"
-                                                        viewBox="0 0 24 24"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeWidth="2"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        className="lucide lucide-music"
-                                                    >
-                                                        <path d="M9 18V5l12-2v13" />
-                                                        <circle cx="6" cy="18" r="3" />
-                                                        <circle cx="18" cy="16" r="3" />
-                                                    </svg>
-                                                    <span className="ml-2 text-sm">
-                                                        James Quinn - Dreamer&apos;s Path
-                                                    </span>
-                                                </div>
+                                                </motion.div>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     </div>
 
-                                    {/* Controls */}
-                                    <div className="absolute right-16 flex flex-col items-center justify-end gap-4">
-                                        {/* Like Button */}
-                                        <div className="flex flex-col items-center">
-                                            <button
-                                                onClick={(e) => handleLike(e, post._id)}
-                                                className="transition-transform hover:scale-110"
-                                            >
-                                                {post?.likes?.includes(userDetails.id) ? (
-                                                    <FaHeart className="text-red-500 w-6 h-6" />
-                                                ) : (
-                                                    <Heart className="w-6 h-6" />
-                                                )}
-                                            </button>
-                                            <p className="text-sm">{post?.comments?.length}</p>
-                                        </div>
+                                    {/* Animated Controls */}
+                                    <motion.div
+                                        className="absolute right-16 flex flex-col items-center justify-end gap-4"
+                                        initial={{ opacity: 0, x: 30 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.7, duration: 0.5 }}
+                                    >
+                                        <motion.button {...buttonAnim} onClick={(e) => handleLike(e, post._id)}>
+                                            {post?.likes?.includes(userDetails.id) ? (
+                                                <FaHeart className="text-red-500 w-6 h-6" />
+                                            ) : (
+                                                <Heart className="w-6 h-6" />
+                                            )}
+                                        </motion.button>
 
                                         <Drawer>
-                                            <DrawerTrigger>
-                                                <MessageCircle className="w-6 h-6 transform -scale-x-100" />
-                                                <p className="text-sm">{post?.comments?.length}</p>
+                                            <DrawerTrigger asChild>
+                                                <motion.div {...buttonAnim}>
+                                                    <MessageCircle className="w-6 h-6 transform -scale-x-100" />
+                                                </motion.div>
                                             </DrawerTrigger>
                                             <DrawerContent className="fixed inset-x-0 bottom-0 w-[30vw] mx-auto h-[60vh] max-h-[80vh] bg-white rounded-t-lg shadow-lg flex flex-col">
                                                 <DrawerHeader className="p-4 border-b">
                                                     <DrawerTitle>Comments</DrawerTitle>
                                                     <DrawerDescription>This action cannot be undone.</DrawerDescription>
                                                 </DrawerHeader>
-                                                <div
-                                                    className={`comments-section flex-1 overflow-y-auto p-4 ${post?.comments?.length === 0 ? 'flex justify-center items-center' : ''
-                                                        }`}
-                                                >
-                                                    {post?.comments?.length > 0 ? (
-                                                        post?.comments?.map((comment) => (
-                                                            <div key={comment._id} className="mb-4">
-                                                                <div className="flex justify-between items-start">
-                                                                    <div className="flex items-start gap-3 flex-1">
-                                                                        <Link to={`/profile/${comment?.user?.username}`}>
-                                                                            <Avatar>
-                                                                                <AvatarImage src={comment?.profilePicture} alt={`${comment?.user?.username}'s profile`} />
-                                                                                <AvatarFallback>{comment?.user?.username}</AvatarFallback>
-                                                                            </Avatar>
-                                                                        </Link>
-                                                                        <div className="flex flex-col">
-                                                                            <p className="flex items-center gap-2">
-                                                                                <strong className="hover:text-zinc-400 text-sm duration-150">{comment?.user?.username}</strong>
-                                                                                <span className="font-light text-sm">{comment.text}</span>
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <Button variant="ghost" size="icon" className="hover:text-zinc-500 transition-colors duration-100">
-                                                                            <FaRegHeart size={10} />
-                                                                            <span className="sr-only">Like comment</span>
-                                                                        </Button>
-                                                                        <DropdownMenu>
-                                                                            <DropdownMenuTrigger asChild>
-                                                                                <Button variant="ghost" size="icon" className="p-0">
-                                                                                    <MoreHorizontal className="w-5 h-5" />
-                                                                                    <span className="sr-only">More options</span>
-                                                                                </Button>
-                                                                            </DropdownMenuTrigger>
-                                                                            <DropdownMenuContent align="end" className="w-60">
-                                                                                <DropdownMenuItem className="text-red-600 justify-center font-bold focus:text-red-600 cursor-pointer">
-                                                                                    Report
-                                                                                </DropdownMenuItem>
-                                                                                <DropdownMenuSeparator />
-                                                                                {/* <DropdownMenuItem onClick={(e) => handleRemoveComment(e, PostDetails?._id, comment?._id)} className="justify-center cursor-pointer text-red-600 font-semibold focus:text-red-600">Delete Message</DropdownMenuItem> */}
-                                                                                <DropdownMenuSeparator />
-                                                                                <DropdownMenuItem className="justify-center cursor-pointer">Cancel</DropdownMenuItem>
-                                                                            </DropdownMenuContent>
-                                                                        </DropdownMenu>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-center">No comments yet. Be the first to comment!</p>
-                                                    )}
-                                                </div>
-                                                <div className="comment-input border-t-[.1px] border-zinc-800 px-4 py-3 bg-gray-100 sticky bottom-0">
-                                                    <form onSubmit={(e) => handleCommentSubmit(e, PostDetails._id)} className="flex items-center">
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Add a comment..."
-                                                            value={comment}
-                                                            onChange={(e) => setComment(e.target.value)}
-                                                            className="flex-1 bg-transparent outline-none text-sm"
-                                                            aria-label="Add a comment"
-                                                        />
-                                                        <Button
-                                                            type="submit"
-                                                            variant="ghost"
-                                                            className={`text-blue-500 font-bold text-sm ${!comment.trim() && 'text-zinc-600'}`}
-                                                            disabled={!comment.trim()}
-                                                        >
-                                                            Post
-                                                        </Button>
-                                                    </form>
-                                                </div>
                                             </DrawerContent>
                                         </Drawer>
 
+                                        {/* <motion.div {...buttonAnim}>
+                                            <Send className="w-6 h-6" />
+                                        </motion.div> */}
 
-                                        {/* Share Button */}
-                                        <div className="flex flex-col items-center">
-                                            <Send className="w-6 h-6 transition-transform hover:scale-110" />
-                                            <p className="text-sm">0</p>
-                                        </div>
+                                        {/* <motion.button {...buttonAnim} onClick={(e) => handleSavePosts(e, post._id)}>
+                                            {Array.isArray(savedPost) && savedPost.includes(post._id) ? (
+                                                <GoBookmarkFill className="w-6 h-6 text-white" />
+                                            ) : (
+                                                <GoBookmark className="w-6 h-6" />
+                                            )}
+                                        </motion.button> */}
 
-                                        {/* Save Button */}
-                                        <div className="flex flex-col items-center">
-                                            <button
-                                                onClick={(e) => handleSavePosts(e, post._id)}
-                                                className="transition-transform hover:scale-110"
-                                            >
-                                                {Array.isArray(savedPost) && savedPost.includes(post._id) ? (
-                                                    <GoBookmarkFill className="w-6 h-6 text-white" />
-                                                ) : (
-                                                    <GoBookmark className="w-6 h-6" />
-                                                )}
-                                            </button>
-                                        </div>
-
-                                        {/* Options Button */}
-                                        <div className="flex flex-col items-center">
-                                            <BsThreeDots className="w-6 h-6 transition-transform hover:scale-110" />
-                                        </div>
-                                    </div>
+                                        {/* <motion.div {...buttonAnim}>
+                                            <BsThreeDots className="w-6 h-6" />
+                                        </motion.div> */}
+                                    </motion.div>
                                 </CarouselItem>
-                            ))}
-                        </CarouselContent>
+                            </motion.div>
+                        ))}
+                    </CarouselContent>
 
-                        {/* Carousel Navigation Arrows */}
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 h-14">
-                            <CarouselPrevious className="w-12 h-12 p-2 rounded-full bg-neutral-800 text-white hover:bg-neutral-700 transition" />
-                            <CarouselNext className="w-12 h-12 p-2 rounded-full bg-neutral-800 text-white hover:bg-neutral-700 transition" />
-                        </div>
-                    </Carousel>
-                </div>
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col gap-4 h-14">
+                        <CarouselPrevious className="w-12 h-12 p-2 rounded-full bg-neutral-800 text-white hover:bg-neutral-700 transition" />
+                        <CarouselNext className="w-12 h-12 p-2 rounded-full bg-neutral-800 text-white hover:bg-neutral-700 transition" />
+                    </div>
+                </Carousel>
             </div>
-
-
-
+        </div>
         </>
     );
 };
 
 export default ReelSection;
+

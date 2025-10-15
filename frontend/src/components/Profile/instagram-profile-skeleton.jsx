@@ -2,7 +2,6 @@
 
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import api from "@/api/api";
 
 export function InstagramProfileSkeletonComponent() {
   return (

@@ -5,8 +5,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function InstagramSkeletonComponent() {
   return (
     (<div className="max-w-lg mx-auto dark:bg-neutral-950">
-      {/* Header */}
-      {/* Posts */}
       {[...Array(2)].map((_, i) => (
         <div key={i} className=" pb-4 mb-4">
           {/* Post header */}

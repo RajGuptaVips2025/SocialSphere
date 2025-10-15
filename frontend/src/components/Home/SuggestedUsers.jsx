@@ -2,12 +2,10 @@ import { useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
-import api from "@/api/api";
 
 // SuggestedUsers.js
 const SuggestedUsers = () => {
   const userDetails = useSelector((state) => state.counter.userDetails);
-  // console.log(userDetails)
   return (
     <aside className="w-80 p-4 hidden lg:block mt-2  dark:bg-neutral-950 dark:text-white">
       <div className="flex items-center mb-6 justify-between">

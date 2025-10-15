@@ -69,11 +69,9 @@ export const userDetailsSlice = createSlice({
       state.rtmNotification = Object.values(state.rtmNotification); // Ensure it's an array
 
       if (action.payload.likeType === 'like' || action.payload.followType === 'follow') {
-        // Add the notification to the state
         state.rtmNotification = [...state.rtmNotification, action.payload];
       } else if (action.payload.likeType === 'dislike' || action.payload.followType === 'unFollow') {
-        state.rtmNotification = Object.values(state.rtmNotification); // Ensure it's an array
-        // Remove the notification from the state
+        state.rtmNotification = Object.values(state.rtmNotification); 
         state.rtmNotification = state.rtmNotification.filter((item) => item.id !== action.payload.id);
       }
     },
