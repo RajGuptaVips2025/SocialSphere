@@ -27,7 +27,8 @@ export function ChatComponent({ socketRef }) {
   const getFollowingUsers = async (username) => {
     try {
       const userId = userDetails.id
-      const response = await api.get(`/api/conversations/conversation/${userId}`)
+      // const response = await axios.get(`/api/conversations/conversation/${userId}`);
+      const response = await api.get(`/api/conversations/conversation/${userId}`);
       const followingUsers = [...response?.data]
       dispatch(setFollowingUsers(followingUsers))
       return response.data
