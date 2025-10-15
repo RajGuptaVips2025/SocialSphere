@@ -45,16 +45,20 @@ const googleLogin = async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    // controllers/googleAuthController.js (or authController.js)
     // res.cookie('token', token, {
     //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production'
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'Strict',
+    //   path: '/',
     // });
 
-    // controllers/googleAuthController.js (or authController.js)
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
+      secure: process.env.NODE_ENV === 'production', // MUST be true in production
+      // 🛑 CRITICAL FIX: Use SameSite=None to allow cookies across different domains (Render front/back)
+      // Only set SameSite=None if secure=true
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
       path: '/',
     });
 
@@ -89,10 +93,19 @@ const getCurrentUser = (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    res.clearCookie('token', {
+    // res.clearCookie('token', {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: 'Strict',
+    //   path: '/',
+    // });
+
+    res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'Strict',
+      secure: process.env.NODE_ENV === 'production', // MUST be true in production
+      // 🛑 CRITICAL FIX: Use SameSite=None to allow cookies across different domains (Render front/back)
+      // Only set SameSite=None if secure=true
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
       path: '/',
     });
 

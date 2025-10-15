@@ -24,7 +24,13 @@ const authMiddleware = async (req, res, next) => {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
       // invalid token: clear cookie and respond 401
-      res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', path: '/' });
+      // res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', path: '/' });
+      res.clearCookie(COOKIE_NAME, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production', 
+          sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // CHANGE HERE
+          path: '/' 
+      });
       return res.status(401).json({ error: 'Unauthorized: invalid token' });
     }
 
@@ -32,7 +38,13 @@ const authMiddleware = async (req, res, next) => {
     const user = await User.findById(decoded.id);
     if (!user) {
       // user deleted — clear cookie & respond 401 so frontend knows to redirect
-      res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', path: '/' });
+      // res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', path: '/' });
+      res.clearCookie(COOKIE_NAME, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production', 
+          sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // CHANGE HERE
+          path: '/' 
+      });
       return res.status(401).json({ error: 'Unauthorized: user not found' });
     }
 
