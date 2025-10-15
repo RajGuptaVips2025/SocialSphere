@@ -100,7 +100,8 @@ const Profile = () => {
   const handleLogout = async () => {
     try {
       // 1. **Call the backend logout route to clear the HTTP-only cookie**
-      await api.post('/auth/logout'); // Assuming your backend api is accessible via `api` and the route is `/api/auth/logout`
+      // await api.post('/auth/logout'); // Assuming your backend api is accessible via `api` and the route is `/api/auth/logout`
+      await api.post('/logout');
 
       // 2. Clear client-side state (if any) and redirect
       // localStorage.removeItem('user-info'); // Remove user info
