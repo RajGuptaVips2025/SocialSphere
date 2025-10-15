@@ -5,7 +5,8 @@ const GroupChat = require('../models/groupChatSchema')
 const cloudinary = require('../config/cloudinary')
 const { getReciverSocketId, io } = require('../socket/socket');
 
-// For individual message sending
+
+
 const sendMessage = async (req, res) => {
   try {
     const { textMessage: message, senderId, messageType } = req.body;
@@ -37,18 +38,35 @@ const sendMessage = async (req, res) => {
       mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
       messageType,
     });
-
+    console.log(newMessage);
     conversation.messages.push(newMessage._id);
+    conversation.lastMessage = {
+      messageId: newMessage._id,
+      text: messageType === 'text' ? message : `[${messageType}]`,
+      senderId,
+      createdAt: newMessage.createdAt,
+    };
+    conversation.updatedAt = new Date();
     await conversation.save();
 
     // Populate the new message with sender and receiver details
-    const populatedMessage = await Message.findById(newMessage._id)
+    const popMessage = await Message.findById(newMessage._id)
       .populate('senderId', 'username profilePicture') // Populate sender details
       .populate('reciverId', 'username profilePicture'); // Populate receiver details
-
+    const populatedMessage = popMessage.toObject();
+    populatedMessage.lastMessage = {
+      text: newMessage.message,
+      createdAt: newMessage.timestamp // use createdAt instead of timestamp
+    };
+    // console.log("populatedMessage  ", populatedMessage)
     const receiverSocketId = getReciverSocketId(receiverId);
+    const senderSocketId = getReciverSocketId(senderId)
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('newMessage', populatedMessage);
+    }
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit('senderMessage', populatedMessage);
     }
 
     res.status(200).json({ success: true, newMessage: populatedMessage });
@@ -107,14 +125,14 @@ const getAllMessages = async (req, res) => {
   }
 };
 
-
 const createGroupChat = async (req, res) => {
   try {
     const { groupName, members, groupImage, createdBy } = req.body;
 
-    // Create the group chat
+    // Add the admin to members
     const allMembers = [...members, { userId: createdBy, role: 'admin' }];
 
+    // Create the group chat
     const newGroupChat = await GroupChat.create({
       groupName,
       groupImage,
@@ -122,13 +140,18 @@ const createGroupChat = async (req, res) => {
       createdBy
     });
 
+    // Create a conversation document for the group
+    const newConversation = await Conversation.create({
+      participants: allMembers.map(m => m.userId),
+      group: newGroupChat._id,
+      messages: [],
+      lastMessage: null
+    });
 
-
+    // Emit socket to all members
     allMembers.forEach(({ userId }) => {
-      // Get the socket ID for this user
       const socketId = getReciverSocketId(userId);
       if (socketId) {
-        // Emit a message to the specific user by their socket ID
         io.to(socketId).emit('groupCreated', {
           message: `You have been added to the group ${groupName}`,
           groupChat: newGroupChat
@@ -136,13 +159,16 @@ const createGroupChat = async (req, res) => {
       }
     });
 
-    res.status(201).json({ success: true, groupChat: newGroupChat });
+    res.status(201).json({
+      success: true,
+      groupChat: newGroupChat,
+      conversation: newConversation
+    });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
-
 
 const getUserGroups = async (req, res) => {
   try {
@@ -167,7 +193,8 @@ const getUserGroups = async (req, res) => {
   }
 };
 
-// For send messages in the group
+// controllers/conversationController.js (inside your module exports)
+
 const sendGroupMessage = async (req, res) => {
   try {
     const { senderId, textMessage: message, messageType } = req.body;
@@ -175,41 +202,79 @@ const sendGroupMessage = async (req, res) => {
 
     let mediaUrl = '';
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "auto",
-      });
+      const result = await cloudinary.uploader.upload(req.file.path, { resource_type: "auto" });
       mediaUrl = result.secure_url;
     }
 
-    const groupChat = await GroupChat.findById(groupId);
+    // 1. Fetch the GroupChat document AND **POPULATE** the members.userId field
+    //    We need this for: a) Group info (name/image), b) Member list for socket emission.
+    const groupChat = await GroupChat.findById(groupId).populate({
+      path: 'members.userId',
+      select: 'username profilePicture', // Include necessary fields for socket/FE update
+    });
+    
     if (!groupChat) {
       return res.status(404).json({ error: 'Group chat not found' });
     }
 
-    const newMessage = {
+    // 2. Save message in Message collection (linking it to the group)
+    const newMessage = await Message.create({
+      senderId,
+      groupId,
+      message: messageType === 'text' ? message : undefined,
+      mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
+      messageType
+    });
+
+    // 3. Update Conversation (for lastMessage and sorting)
+    const conversation = await Conversation.findOne({ group: groupId });
+    if (!conversation) return res.status(404).json({ error: "Conversation not found" });
+
+    conversation.messages.push(newMessage._id);
+    conversation.lastMessage = {
+      messageId: newMessage._id,
+      text: messageType === 'text' ? message : `[${messageType}]`,
+      senderId,
+      createdAt: newMessage.timestamp // Use newMessage.timestamp or createdAt
+    };
+    conversation.updatedAt = new Date();
+    await conversation.save();
+
+    // 4. Update GroupChat embedded messages (for easy retrieval of history)
+    // Note: groupChat is already fetched and populated above.
+    groupChat.messages.push({
       senderId,
       message: messageType === 'text' ? message : undefined,
       mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
       messageType,
-    };
-
-    groupChat.messages.push(newMessage);
-    groupChat.updatedAt = Date.now();
-
+      timestamp: newMessage.timestamp
+    });
+    groupChat.updatedAt = new Date();
     await groupChat.save();
 
-    // Emit the new message to all group members via socket.io
-    const members = groupChat.members.map(member => member.userId.toString());
-    members.forEach(memberId => {
-      const memberSocketId = getReciverSocketId(memberId);
-      if (memberSocketId) {
-        io.to(memberSocketId).emit('sendGroupMessage', newMessage);
-      }
+    // 5. Prepare the message object for Socket.IO emission
+    // We need the message, plus the sender's user details (for displaying in the other user's chat)
+    const popMessage = await Message.findById(newMessage._id).populate('senderId', 'username profilePicture');
+    const newMsg = popMessage.toObject();
+    
+    // Add group specific fields for the socket event (used in ChatComponent to update the list)
+    newMsg.groupName = groupChat.groupName;
+    newMsg.groupImage = groupChat.groupImage;
+    newMsg.groupId = groupId; 
+    
+    // 6. Emit message to all group members
+    groupChat.members.forEach(m => {
+      // m.userId is now guaranteed to be the populated User object
+      const memberId = m.userId._id.toString(); 
+      const socketId = getReciverSocketId(memberId);
+      if (socketId) io.to(socketId).emit('sendGroupMessage', newMsg);
     });
-
-    res.status(201).json({ success: true, newMessage });
+    
+    // 7. Send final response
+    res.status(201).json({ success: true, newMessage: newMsg });
+    
   } catch (error) {
-    console.error(error.message);
+    console.error("Error in sendGroupMessage:", error.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -340,6 +405,82 @@ const renameGroup = async (req, res) => {
   }
 };
 
+const getRecentContacts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find conversations where user is a participant
+    const conversations = await Conversation.find({
+      participants: userId
+    })
+      .populate({
+        path: 'participants',
+        select: 'username fullName profilePicture',
+      })
+      .populate({
+        path: 'group',
+        select: 'groupName groupImage members',
+        populate: { path: 'members.userId', select: 'username fullName profilePicture' }
+      })
+      .populate({
+        path: 'messages',
+        options: { sort: { createdAt: -1 }, limit: 1 }, // latest message
+        populate: {
+          path: 'senderId',
+          select: 'username fullName profilePicture'
+        }
+      })
+      .sort({ updatedAt: -1 }); // sort by last activity
+
+    const result = conversations.map(conv => {
+      const latestMessage = conv.lastMessage;
+
+      // Check if it's a group conversation
+      if (conv.group) {
+        return {
+          _id: conv.group._id,
+          groupName: conv.group.groupName,
+          groupImage: conv.group.groupImage,
+          members: conv.group.members.map(m => ({
+            _id: m.userId._id,
+            username: m.userId.username,
+            fullName: m.userId.fullName,
+            profilePicture: m.userId.profilePicture,
+            role: m.role
+          })),
+          lastMessage: latestMessage
+            ? {
+              text: latestMessage.text,
+              createdAt: latestMessage.createdAt || conv.updatedAt
+            }
+            : null,
+          time: latestMessage ? latestMessage.createdAt : conv.updatedAt
+        };
+      } else {
+        // 1-on-1 conversation
+        const otherUser = conv.participants.find(p => p._id.toString() !== userId);
+        return {
+          _id: otherUser?._id,
+          username: otherUser?.username,
+          name: otherUser?.fullName,
+          profilePicture: otherUser?.profilePicture,
+          lastMessage: latestMessage
+            ? {
+              text: latestMessage.text,
+              createdAt: latestMessage.createdAt || conv.updatedAt
+            }
+            : null,
+          time: latestMessage ? latestMessage.createdAt : conv.updatedAt
+        };
+      }
+    });
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
 
 
 module.exports = {
@@ -352,5 +493,6 @@ module.exports = {
   addMemberToGroup,
   removeMemberFromGroup,
   getUserGroups,
-  renameGroup
+  renameGroup,
+  getRecentContacts
 };

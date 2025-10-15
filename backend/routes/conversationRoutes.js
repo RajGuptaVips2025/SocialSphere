@@ -9,7 +9,8 @@ const {
   addMemberToGroup,
   removeMemberFromGroup,
   getUserGroups,
-  renameGroup
+  renameGroup,
+  getRecentContacts
 } = require('../controllers/conversationController');
 // const authMiddleware = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
@@ -19,6 +20,7 @@ const router = express.Router();
 router.post('/send/message/:id',  upload.single('media'), sendMessage);  // Send message to individual user
 router.get('/followingUsers/:username',  getFriends);  // Get the list of friends/following users
 router.get('/all/messages/:id',  getAllMessages);  // Get all messages with a user
+router.get('/conversation/:userId',getRecentContacts);
 
 // Routes for group chat
 router.post('/group/create',  createGroupChat);  // Create a new group chat

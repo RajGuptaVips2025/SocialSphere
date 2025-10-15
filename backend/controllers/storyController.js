@@ -20,7 +20,8 @@ const storyUpload = async (req, res) => {
             return res.status(400).json({ error: 'No files uploaded' });
         }
 
-        const userId = req.user.id;
+        // const userId = req.user.id;
+        const userId = req.body.userId;     
 
         // Check if the user already has a story
         let existingStory = await Story.findOne({ user: userId });

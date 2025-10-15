@@ -5,8 +5,6 @@ const cloudinary = require('../config/cloudinary'); // Import Cloudinary
 const fs = require('fs'); // To delete files after upload
 const { getReciverSocketId, io } = require('../socket/socket');
 
-
-
 const createPost = async (req, res) => {
   try {
     const { caption, author } = req.body;

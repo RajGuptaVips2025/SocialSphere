@@ -6,7 +6,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const { storyUpload, getStories } = require("../controllers/storyController");
 
 // POST: Upload Story
-router.post("/uploadStory",authMiddleware,  upload.array('media'), storyUpload);
+router.post("/uploadStory",  upload.array('media'), storyUpload);
 router.get("/getStories/:userId",  getStories);
 
 module.exports = router;

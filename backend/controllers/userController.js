@@ -27,7 +27,6 @@ const getUserAndPosts = async (req, res) => {
   }
 };
 
-
 const getFollowing = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
@@ -51,52 +50,6 @@ const getFollowing = async (req, res) => {
   }
 
 };
-
-
-// const following = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.id).select('-password');
-//     const followingUser = await User.findById(req.body.followingID);
-//     let newObj = {};
-//     if (!user.following.includes(req.body.followingID)) {
-//       user.following.push(req.body.followingID);
-//       newObj = {
-//         followType: 'follow',
-//         id: user._id,
-//         username: user.username,
-//         userPic: user.profilePicture
-//       };
-//     } else {
-//       user.following.pull(req.body.followingID);
-//       newObj = {
-//         followType: 'unFollow',
-//         id: user._id,
-//         username: user.username,
-//         userPic: user.profilePicture
-//       };
-//     }
-//     if (!followingUser.followers.includes(req.params.id)) {
-//       followingUser.followers.push(req.params.id);
-//     } else {
-//       followingUser.followers.pull(req.params.id);
-//     }
-//     await user.save();
-//     await followingUser.save();
-    
-//     const receiverSocketId = getReciverSocketId(followingUser._id);
-    
-//     if (receiverSocketId) {
-//       io.to(receiverSocketId).emit('rtmNotification', newObj);
-//     } else {
-//       console.log('Receiver not connected to socket');
-//     }
-
-//     res.json(user);
-//   } catch (error) {
-//     res.status(500).json({ error: 'Server error' });
-//   }
-// };
-
 
 const following = async (req, res) => {
   try {
@@ -259,14 +212,6 @@ const getUserDashboard = async (req, res) => {
       totalComments: totalComments.length, // Number of total comments
       totalViews: totalViews.length, // Number of total views
       reels
-      // reels: reels.map(reel => ({
-      //   _id: reel._id,
-      //   thumbnail: reel.thumbnail,
-      //   likes: reel.likes,
-      //   comments: reel.comments,
-      //   views: 10,
-      //   // caption
-      // })),
     };
 
     return res.json(responseData);
@@ -276,6 +221,25 @@ const getUserDashboard = async (req, res) => {
   }
 };
 
-// Define other controller methods here...
+// usersController.js (New function)
+const checkUsernameAvailability = async (req, res) => {
+  try {
+    const { username } = req.query;
+    if (!username) {
+      return res.status(400).json({ message: 'Username is required' });
+    }
 
-module.exports = { getUserAndPosts, getFollowing, following, updateProfile, addToReelHistory, getUserDashboard };
+    const user = await User.findOne({ username });
+
+    // If user is null, the username is available
+    const isAvailable = !user; 
+
+    res.status(200).json({ isAvailable });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+// Add this to your module.exports
+
+module.exports = { getUserAndPosts, getFollowing, following, updateProfile, addToReelHistory, getUserDashboard, checkUsernameAvailability };

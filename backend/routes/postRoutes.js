@@ -1,11 +1,9 @@
 const express = require('express');
 const { createPost, getAllPosts, like, savePost, getComment, writeComment, getSavedPosts, removeComment, deletePost } = require('../controllers/postController');
 const upload = require('../middlewares/uploadMiddleware');
-// const authMiddleware = require('../middlewares/authMiddleware');
 const router = express.Router();
 
 router.post('/create', upload.array('media', 10), createPost); // Handle up to 10 files
-
 router.get('/getPosts',  getAllPosts);
 router.put('/:id/like',  like);
 router.get('/:id/comment',  getComment);
