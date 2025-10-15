@@ -100,11 +100,9 @@ const logout = async (req, res) => {
     //   path: '/',
     // });
 
-    res.cookie('token', token, {
+    res.clearCookie('token', { // Syntax: res.clearCookie(Name, Options)
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // MUST be true in production
-      // 🛑 CRITICAL FIX: Use SameSite=None to allow cookies across different domains (Render front/back)
-      // Only set SameSite=None if secure=true
+      secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
       path: '/',
     });

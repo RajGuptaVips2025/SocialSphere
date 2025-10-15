@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/google', googleLogin);
 router.get('/me', authMiddleware, getCurrentUser);
-router.post('/logout', logout); // Or use .get('/logout')
+router.post('/logout', logout); 
 
 module.exports = router;
 

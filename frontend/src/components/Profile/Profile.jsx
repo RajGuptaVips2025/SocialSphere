@@ -88,31 +88,14 @@ const Profile = () => {
     }
   }, [dispatch, userDetails.id]);
 
-  // const handleLogout = async () => {
-  //   try {
-  //     localStorage.removeItem('user-info'); // Remove user info
-  //     navigate('/login'); // Redirect to login page
-  //   } catch (error) {
-  //     console.error('Error during logout:', error.message);
-  //   }
-  // };
-
   const handleLogout = async () => {
     try {
-      // 1. **Call the backend logout route to clear the HTTP-only cookie**
-      // await api.post('/auth/logout'); // Assuming your backend api is accessible via `api` and the route is `/api/auth/logout`
       await api.post('/auth/logout');
 
-      // 2. Clear client-side state (if any) and redirect
-      // localStorage.removeItem('user-info'); // Remove user info
       navigate('/login'); // Redirect to login page
       toast.info("Logged out successfully!"); // Optional toast notification
     } catch (error) {
       console.error('Error during logout:', error.message);
-      // Even if backend fails, attempt client-side cleanup
-      // localStorage.removeItem('user-info');
-      // navigate('/login');
-      // toast.error("Logout failed, but client session cleared.");
     }
   };
 
@@ -134,11 +117,8 @@ const Profile = () => {
   const handleFollowing = async (e, followingID) => {
     e.preventDefault();
     const userId = userDetails.id;
-    // console.log(followingID);
-    // console.log(userId);/
     try {
       const { data: { following, followers } } = await api.put(`/users/${userId}/following`, { followingID });
-      // console.log(following, followers);
       dispatch(setFollowing(following));
       dispatch(setFollower(followers));
       setFollowingUserss(following);
