@@ -13,7 +13,7 @@ import { InstagramProfileSkeletonComponent } from './instagram-profile-skeleton'
 import { IoChatbubbleSharp } from 'react-icons/io5';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import PostComment from '../Home/PostComment';
-import StoryUpload from '../StoryUpload';
+// import StoryUpload from '../StoryUpload';
 import { toast } from 'react-toastify';
 import api from '@/api/api';
 
@@ -126,8 +126,11 @@ const Profile = () => {
   const handleFollowing = async (e, followingID) => {
     e.preventDefault();
     const userId = userDetails.id;
+    console.log(followingID);
+    // console.log(userId);/
     try {
       const { data: { following, followers } } = await api.put(`/users/${userId}/following`, { followingID });
+      // console.log(following, followers);
       dispatch(setFollowing(following));
       dispatch(setFollower(followers));
       setFollowingUserss(following);
