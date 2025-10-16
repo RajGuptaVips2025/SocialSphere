@@ -54,7 +54,6 @@ const getStories = async (req, res) => {
     const { userId } = req.params;
 
     try {
-        // Find stories for the specific user
         const userStories = await Story.findOne({ user: userId })
             .populate('user', 'username profilePicture') // Populate specific user fields
             .sort({ createdAt: -1 }); // Sort by most recent first, though for a single user, only one document is expected

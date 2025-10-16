@@ -45,19 +45,9 @@ const googleLogin = async (req, res) => {
       { expiresIn: '1h' }
     );
 
-    // controllers/googleAuthController.js (or authController.js)
-    // res.cookie('token', token, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'Strict',
-    //   path: '/',
-    // });
-
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // MUST be true in production
-      // 🛑 CRITICAL FIX: Use SameSite=None to allow cookies across different domains (Render front/back)
-      // Only set SameSite=None if secure=true
+      secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
       path: '/',
     });
@@ -75,11 +65,9 @@ const googleLogin = async (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  // authMiddleware will already set req.user
   const user = req.user;
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
-  // Don't send sensitive fields
   const safeUser = {
     _id: user._id,
     fullName: user.fullName,
@@ -93,14 +81,8 @@ const getCurrentUser = (req, res) => {
 
 const logout = async (req, res) => {
   try {
-    // res.clearCookie('token', {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === 'production',
-    //   sameSite: 'Strict',
-    //   path: '/',
-    // });
 
-    res.clearCookie('token', { // Syntax: res.clearCookie(Name, Options)
+    res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',

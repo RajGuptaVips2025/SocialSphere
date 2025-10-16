@@ -2,11 +2,10 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userSchema');
 
-const COOKIE_NAME = 'token'; // keep this consistent across frontend/backend
+const COOKIE_NAME = 'token'; 
 
 const authMiddleware = async (req, res, next) => {
   try {
-    // Support cookie or Authorization header
     const token =
       req.cookies?.[COOKIE_NAME] ||
       (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')
@@ -23,26 +22,21 @@ const authMiddleware = async (req, res, next) => {
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
-      // invalid token: clear cookie and respond 401
-      // res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', path: '/' });
       res.clearCookie(COOKIE_NAME, { 
           httpOnly: true, 
           secure: process.env.NODE_ENV === 'production', 
-          sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // CHANGE HERE
+          sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
           path: '/' 
       });
       return res.status(401).json({ error: 'Unauthorized: invalid token' });
     }
 
-    // decoded should contain user id
     const user = await User.findById(decoded.id);
     if (!user) {
-      // user deleted — clear cookie & respond 401 so frontend knows to redirect
-      // res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict', path: '/' });
       res.clearCookie(COOKIE_NAME, { 
           httpOnly: true, 
           secure: process.env.NODE_ENV === 'production', 
-          sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // CHANGE HERE
+          sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', 
           path: '/' 
       });
       return res.status(401).json({ error: 'Unauthorized: user not found' });

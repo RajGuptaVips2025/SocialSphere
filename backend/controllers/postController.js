@@ -35,11 +35,9 @@ const createPost = async (req, res) => {
         imageHeight: result.height,
       });
 
-      // Remove file from server after uploading
       fs.unlinkSync(file.path);
     }
 
-    // Store post details in MongoDB
     const newPost = new Post({
       caption,
       media: mediaDetails, // Save multiple media objects
@@ -68,14 +66,13 @@ const getAllPosts = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
 
   try {
-    // const posts = await Post.find().skip(page * limit).limit(limit).populate('author', 'username profilePicture').populate('comments.user', 'username');
     const posts = await Post.find()
-  .sort({ createdAt: -1 })  // ✅ Sort by latest posts
-  .skip(page * limit)
-  .limit(limit)
-  .populate('author', 'username profilePicture')
-  .populate('comments.user', 'username')
-  .lean(); // ✅ Faster response by returning plain JS objects
+      .sort({ createdAt: -1 })  // ✅ Sort by latest posts
+      .skip(page * limit)
+      .limit(limit)
+      .populate('author', 'username profilePicture')
+      .populate('comments.user', 'username')
+      .lean(); // ✅ Faster response by returning plain JS objects
 
     res.json(posts);
   } catch (err) {
@@ -182,7 +179,6 @@ const removeComment = async (req, res) => {
   const { postId, commentId } = req.params;
 
   try {
-    // Find the post by its ID and update it by removing the comment
     const post = await Post.findByIdAndUpdate(
       postId,
       { $pull: { comments: { _id: commentId } } }, // Assuming _id is the field for each comment
@@ -200,7 +196,6 @@ const removeComment = async (req, res) => {
     return res.status(500).json({ message: 'Server error' });
   }
 };
-
 
 const deletePost = async (req, res) => {
   try {

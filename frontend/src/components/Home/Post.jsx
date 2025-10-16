@@ -278,25 +278,6 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                 </Button>
               </motion.div>
             </div>
-
-            {/* <motion.button
-              onClick={(e) => handleSavePosts(e, post._id)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              {Array.isArray(savedPost) && savedPost.includes(post._id) ? (
-                <GoBookmarkFill
-                  size={25}
-                  className="dark:text-white transition-transform"
-                />
-              ) : (
-                <GoBookmark
-                  size={25}
-                  className="hover:text-zinc-800 dark:hover:text-zinc-500 transition-colors dark:text-white duration-100"
-                />
-              )}
-            </motion.button> */}
           </motion.div>
 
           <motion.p

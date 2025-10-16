@@ -5,18 +5,15 @@ const GroupChat = require('../models/groupChatSchema')
 const cloudinary = require('../config/cloudinary')
 const { getReciverSocketId, io } = require('../socket/socket');
 
-
-
 const sendMessage = async (req, res) => {
   try {
     const { textMessage: message, senderId, messageType } = req.body;
     const receiverId = req.params.id;
 
-    // Handle file upload (if exists)
     let mediaUrl = '';
     if (req.file) {
       const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "auto",  // Automatically detects image or video
+        resource_type: "auto", 
       });
       mediaUrl = result.secure_url;
     }
@@ -206,8 +203,6 @@ const sendGroupMessage = async (req, res) => {
       mediaUrl = result.secure_url;
     }
 
-    // 1. Fetch the GroupChat document AND **POPULATE** the members.userId field
-    //    We need this for: a) Group info (name/image), b) Member list for socket emission.
     const groupChat = await GroupChat.findById(groupId).populate({
       path: 'members.userId',
       select: 'username profilePicture', // Include necessary fields for socket/FE update
@@ -217,7 +212,6 @@ const sendGroupMessage = async (req, res) => {
       return res.status(404).json({ error: 'Group chat not found' });
     }
 
-    // 2. Save message in Message collection (linking it to the group)
     const newMessage = await Message.create({
       senderId,
       groupId,
@@ -226,7 +220,6 @@ const sendGroupMessage = async (req, res) => {
       messageType
     });
 
-    // 3. Update Conversation (for lastMessage and sorting)
     const conversation = await Conversation.findOne({ group: groupId });
     if (!conversation) return res.status(404).json({ error: "Conversation not found" });
 
@@ -240,8 +233,6 @@ const sendGroupMessage = async (req, res) => {
     conversation.updatedAt = new Date();
     await conversation.save();
 
-    // 4. Update GroupChat embedded messages (for easy retrieval of history)
-    // Note: groupChat is already fetched and populated above.
     groupChat.messages.push({
       senderId,
       message: messageType === 'text' ? message : undefined,
@@ -252,25 +243,19 @@ const sendGroupMessage = async (req, res) => {
     groupChat.updatedAt = new Date();
     await groupChat.save();
 
-    // 5. Prepare the message object for Socket.IO emission
-    // We need the message, plus the sender's user details (for displaying in the other user's chat)
     const popMessage = await Message.findById(newMessage._id).populate('senderId', 'username profilePicture');
     const newMsg = popMessage.toObject();
     
-    // Add group specific fields for the socket event (used in ChatComponent to update the list)
     newMsg.groupName = groupChat.groupName;
     newMsg.groupImage = groupChat.groupImage;
     newMsg.groupId = groupId; 
     
-    // 6. Emit message to all group members
     groupChat.members.forEach(m => {
-      // m.userId is now guaranteed to be the populated User object
       const memberId = m.userId._id.toString(); 
       const socketId = getReciverSocketId(memberId);
       if (socketId) io.to(socketId).emit('sendGroupMessage', newMsg);
     });
     
-    // 7. Send final response
     res.status(201).json({ success: true, newMessage: newMsg });
     
   } catch (error) {
@@ -279,7 +264,6 @@ const sendGroupMessage = async (req, res) => {
   }
 };
 
-// Get all messages from a group chat
 const getGroupMessages = async (req, res) => {
   try {
     const groupId = req.params.groupId;
@@ -296,12 +280,10 @@ const getGroupMessages = async (req, res) => {
   }
 };
 
-// Add a member to the group chat
 const addMemberToGroup = async (req, res) => {
   try {
     const { groupId } = req.params;
     const { userId } = req.body;
-    // console.log(userId);
 
     // Validate inputs
     if (!groupId || !userId) {

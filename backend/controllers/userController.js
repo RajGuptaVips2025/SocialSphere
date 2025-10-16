@@ -1,13 +1,13 @@
 const User = require('../models/userSchema');
 const Post = require('../models/postSchema');
 const Story = require('../models/storySchema');
-const cloudinary = require('../config/cloudinary'); // Import Cloudinary
+const cloudinary = require('../config/cloudinary'); 
 const { getReciverSocketId, io } = require('../socket/socket');
 
 
 const getUserAndPosts = async (req, res) => {
-  const page = parseInt(req.query.page) || 0; // Default page to 0 if not provided
-  const limit = parseInt(req.query.limit) || 10; // Default limit to 10 if not provided
+  const page = parseInt(req.query.page) || 0; 
+  const limit = parseInt(req.query.limit) || 10; 
   try {
     const { username } = req.params;
     const user = await User.findOne({ username }).select('-password');
@@ -36,10 +36,8 @@ const getFollowing = async (req, res) => {
     }
   
     const followingUsers = [...user.following, user._id];
-    // console.log(followingUsers);
-    // Fetch stories of all users in the following list
     const stories = await Story.find({ user: { $in: followingUsers } })
-      .populate("user", "username profilePicture") // Populate the username and profile picture
+      .populate("user", "username profilePicture") 
       .sort({ createdAt: -1 });
   
     res.json({ user, stories });
@@ -111,8 +109,7 @@ const updateProfile = async (req, res) => {
     const { id } = req.params; // Get user ID from the request parameters
     const { username, name, bio } = req.body; // Assume these fields are being updated
     let updateData = { username, name, bio };
-    // Check if a new profile image is uploaded
-    let result; // Declare result outside the try block
+    let result; 
 
     if (req.file) {
       // Update the profile image field
@@ -174,43 +171,34 @@ const addToReelHistory = async (req, res) => {
 const getUserDashboard = async (req, res) => {
   try {
     const { username } = req.params;
-
-    // Find the user by username
     const user = await User.findOne({ username });
-    // console.log(user);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Fetch all reels (posts) by this user
     const reels = await Post.find({ author: user._id });
-    // console.log(reels);
 
-    // Initialize arrays for likes, comments, and views IDs
     const totalLikes = [];
     const totalComments = [];
     const totalViews = [];
 
-    // Calculate total likes, comments, and views while storing IDs
     reels.forEach(reel => {
-      // console.log(reel)
       if (reel.likes.length > 0) {
-        totalLikes.push(reel._id); // Store reel ID if it has likes
+        totalLikes.push(reel._id); 
       }
       if (reel.comments.length > 0) {
-        totalComments.push(reel._id); // Store reel ID if it has comments
+        totalComments.push(reel._id); 
       }
       if (reel.views > 0) {
-        totalViews.push(reel._id); // Store reel ID if it has views
+        totalViews.push(reel._id); 
       }
     });
 
-    // Prepare response data
     const responseData = {
-      totalLikes: totalLikes.length, // Number of total likes
-      totalComments: totalComments.length, // Number of total comments
-      totalViews: totalViews.length, // Number of total views
+      totalLikes: totalLikes.length, 
+      totalComments: totalComments.length, 
+      totalViews: totalViews.length, 
       reels
     };
 
@@ -221,7 +209,7 @@ const getUserDashboard = async (req, res) => {
   }
 };
 
-// usersController.js (New function)
+
 const checkUsernameAvailability = async (req, res) => {
   try {
     const { username } = req.query;
@@ -231,7 +219,6 @@ const checkUsernameAvailability = async (req, res) => {
 
     const user = await User.findOne({ username });
 
-    // If user is null, the username is available
     const isAvailable = !user; 
 
     res.status(200).json({ isAvailable });
@@ -240,6 +227,5 @@ const checkUsernameAvailability = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
-// Add this to your module.exports
 
 module.exports = { getUserAndPosts, getFollowing, following, updateProfile, addToReelHistory, getUserDashboard, checkUsernameAvailability };

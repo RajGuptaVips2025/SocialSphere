@@ -331,22 +331,6 @@ const ReelSection = () => {
                                                 </DrawerHeader>
                                             </DrawerContent>
                                         </Drawer>
-
-                                        {/* <motion.div {...buttonAnim}>
-                                            <Send className="w-6 h-6" />
-                                        </motion.div> */}
-
-                                        {/* <motion.button {...buttonAnim} onClick={(e) => handleSavePosts(e, post._id)}>
-                                            {Array.isArray(savedPost) && savedPost.includes(post._id) ? (
-                                                <GoBookmarkFill className="w-6 h-6 text-white" />
-                                            ) : (
-                                                <GoBookmark className="w-6 h-6" />
-                                            )}
-                                        </motion.button> */}
-
-                                        {/* <motion.div {...buttonAnim}>
-                                            <BsThreeDots className="w-6 h-6" />
-                                        </motion.div> */}
                                     </motion.div>
                                 </CarouselItem>
                             </motion.div>

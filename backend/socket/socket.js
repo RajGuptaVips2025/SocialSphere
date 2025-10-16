@@ -5,13 +5,11 @@ const http = require('http');
 const app = express();
 const server = http.createServer(app);
 
-// Determine the current environment
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Define allowed origins from environment variables
 const allowedOrigins = [
-  process.env.FRONTEND_PROD_URL, // e.g., "https://instagram-frontend-j39q.onrender.com"
-  process.env.FRONTEND_DEV_URL   // e.g., "http://localhost:5173"
+  process.env.FRONTEND_PROD_URL, 
+  process.env.FRONTEND_DEV_URL  
 ];
 console.log('Allowed origins:', allowedOrigins);
 
@@ -23,7 +21,7 @@ const io = new Server(server, {
   }
 });
 
-const userSocketMap = {};  // Maps userId to socketId
+const userSocketMap = {};  
 
 const getReciverSocketId = (receiverId) => userSocketMap[receiverId];
 
@@ -32,20 +30,16 @@ io.on('connection', (socket) => {
   if (userId) {
     userSocketMap[userId] = socket.id;
   }
-  // Emit online users to all clients
   io.emit('getOnlineUsers', Object.keys(userSocketMap));
 
-  // User joins a group chat (groupRoom is like the group's unique ID)
   socket.on('joinGroup', ({ groupId }) => {
     socket.join(groupId);
   });
 
-  // Handle group message sending
   socket.on('sendGroupMessage', ({ groupId, senderId, message }) => {
     io.to(groupId).emit('receiveGroupMessage', { senderId, message, groupId });
   });
 
-  // Handle WebRTC signaling data
   socket.on('videoCallOffer', ({ to, offer }) => {
     const receiverSocketId = getReciverSocketId(to);
     if (receiverSocketId) {
@@ -74,7 +68,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle user disconnection
   socket.on('disconnect', () => {
     if (userId && userSocketMap[userId] === socket.id) {
       delete userSocketMap[userId];

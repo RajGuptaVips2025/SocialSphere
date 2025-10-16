@@ -71,7 +71,6 @@ function ChildApp() {
         <Route path="/chats/:id?" element={<ProtectedRoute><ChatComponent socketRef={socketRef} /></ProtectedRoute>} />
         <Route path="/discover/" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
         <Route path="/vids/" element={<ProtectedRoute><ReelSection /></ProtectedRoute>} />
-        {/* <Route path="/accounts/edit/:id" element={<ProtectedRoute><ProfileEdit /></ProtectedRoute>} /> */}
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
       </Routes>
     </>
