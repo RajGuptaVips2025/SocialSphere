@@ -42,7 +42,7 @@ const googleLogin = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email, needsUsername: user.needsUsername || isNewUser },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: 60 * 60 * 24 * 30 }
     );
 
     res.cookie('token', token, {

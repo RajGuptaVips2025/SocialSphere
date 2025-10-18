@@ -1,5 +1,4 @@
 // Login.jsx
-
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -39,7 +38,7 @@ const Login = () => {
         if (needsUsername) {
             navigate(`/profile/${username}`);
         } else {
-            toast.success('Google login successful');
+            toast.success('login successful');
             navigate(`/profile/${username}`); 
         }
         
@@ -47,8 +46,8 @@ const Login = () => {
         toast.error('No authorization code received');
       }
     } catch (err) {
-      console.error('Google login error:', err.message);
-      toast.error('Google login failed');
+      console.error('login error:', err.message);
+      toast.error('login failed');
     }
   };
 
@@ -57,8 +56,8 @@ const Login = () => {
       handleGoogleResponse(response);
     },
     onError: (error) => {
-      console.error("Google login failed:", error);
-      toast.error("Google login failed");
+      console.error("login failed:", error);
+      toast.error("login failed");
     },
     flow: "auth-code",
   });
@@ -113,7 +112,7 @@ const Login = () => {
           onClick={() => googleLogin()}
           className="w-full py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-md shadow-md transition duration-200"
         >
-          Login with Google
+          Login To SocialSphere
         </motion.button>
       </motion.div>
     </motion.div>

@@ -9,14 +9,7 @@ import { Link } from 'react-router-dom';
 
 function MessagesMember({ socketRef }) {
   const followingUsers = useSelector((state) => state.counter.followingUsers, shallowEqual);
-  // console.log(followingUsers, "followingUsers line12")
   const onlineUsers = useSelector((state) => state.counter.onlineUsers, shallowEqual);
-  // console.log(onlineUsers, "OnlineUsers line14")
-
-  // useEffect(() => {
-  //   console.log('followingUsers changed', followingUsers)
-  // }, [followingUsers])
-
 
   if (!followingUsers || followingUsers.length === 0) {
     return <p className="text-gray-500">No following users available.</p>
