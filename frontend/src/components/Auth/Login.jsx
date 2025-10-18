@@ -18,7 +18,7 @@ const Login = () => {
         const result = await googleAuth(response['code']);
         
         const user = result.data.user;
-        const token = result.data.token;
+        // const token = result.data.token;
         const { fullName, username, email, profilePicture, needsUsername } = user; // 💡 Extract needsUsername
         
         dispatch(addUser({
@@ -29,11 +29,11 @@ const Login = () => {
           profilePic: profilePicture,
         }));
 
-        if (token) {
-          const expiryDate = new Date();
-          expiryDate.setDate(expiryDate.getDate() + 7);
-          document.cookie = `token=${token}; path=/; expires=${expiryDate.toUTCString()}; SameSite=Strict`;
-        }
+        // if (token) {
+        //   const expiryDate = new Date();
+        //   expiryDate.setDate(expiryDate.getDate() + 7);
+        //   document.cookie = `token=${token}; path=/; expires=${expiryDate.toUTCString()}; SameSite=Strict`;
+        // }
         
         if (needsUsername) {
             navigate(`/profile/${username}`);

@@ -45,11 +45,20 @@ const googleLogin = async (req, res) => {
       { expiresIn: 60 * 60 * 24 * 30 }
     );
 
+    // res.cookie('token', token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === 'production',
+    //   sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+    //   path: '/',
+    // });
+
+    // ✅ Set cookie for 30 days
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+      secure: process.env.NODE_ENV === 'production', // true only for HTTPS
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       path: '/',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
 
@@ -79,13 +88,29 @@ const getCurrentUser = (req, res) => {
   res.status(200).json({ user: safeUser });
 };
 
+// const logout = async (req, res) => {
+//   try {
+
+//     res.clearCookie('token', {
+//       httpOnly: true,
+//       secure: process.env.NODE_ENV === 'production',
+//       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+//       path: '/',
+//     });
+
+//     res.status(200).json({ message: 'Logout successful' });
+//   } catch (err) {
+//     console.error('Logout error:', err);
+//     res.status(500).json({ error: 'Internal server error during logout' });
+//   }
+// };
+
 const logout = async (req, res) => {
   try {
-
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
       path: '/',
     });
 
