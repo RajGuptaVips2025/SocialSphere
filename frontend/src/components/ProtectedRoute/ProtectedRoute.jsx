@@ -53,12 +53,13 @@ const ProtectedRoute = ({ children }) => {
     // return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
     return <InstagramSkeletonComponent />;
   }
-
+  
   if (!allowed) {
     return <Navigate to="/login" replace />;
   }
-
+  
   return children;
 };
 
 export default ProtectedRoute;
+
