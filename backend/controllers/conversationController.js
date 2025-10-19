@@ -5,73 +5,177 @@ const GroupChat = require('../models/groupChatSchema')
 const cloudinary = require('../config/cloudinary')
 const { getReciverSocketId, io } = require('../socket/socket');
 
+// const sendMessage = async (req, res) => {
+//   try {
+//     const { textMessage: message, senderId, messageType } = req.body;
+//     const receiverId = req.params.id;
+
+//     let mediaUrl = '';
+//     if (req.file) {
+//       const result = await cloudinary.uploader.upload(req.file.path, {
+//         resource_type: "auto",
+//       });
+//       mediaUrl = result.secure_url;
+//     }
+
+//     let conversation = await Conversation.findOne({
+//       participants: { $all: [senderId, receiverId] }
+//     });
+
+//     if (!conversation) {
+//       conversation = await Conversation.create({
+//         participants: [senderId, receiverId],
+//       });
+//     }
+
+//     const newMessage = await Message.create({
+//       senderId,
+//       reciverId: receiverId,
+//       message: messageType === 'text' ? message : undefined,
+//       mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
+//       messageType,
+//     });
+    
+//     conversation.messages.push(newMessage._id);
+//     conversation.lastMessage = {
+//       messageId: newMessage._id,
+//       text: messageType === 'text' ? message : `[${messageType}]`,
+//       senderId,
+//       createdAt: newMessage.createdAt,
+//     };
+//     conversation.updatedAt = new Date();
+//     await conversation.save();
+
+//     // Populate the new message with sender and receiver details
+//     const popMessage = await Message.findById(newMessage._id)
+//       .populate('senderId', 'username profilePicture') // Populate sender details
+//       .populate('reciverId', 'username profilePicture'); // Populate receiver details
+//     const populatedMessage = popMessage.toObject();
+//     populatedMessage.lastMessage = {
+//       text: newMessage.message,
+//       createdAt: newMessage.timestamp // use createdAt instead of timestamp
+//     };
+
+//     // const receiverSocketId = getReciverSocketId(receiverId);
+//     // const senderSocketId = getReciverSocketId(senderId)
+//     // if (receiverSocketId) {
+//     //   io.to(receiverSocketId).emit('newMessage', populatedMessage);
+//     // }
+
+//     // if (senderSocketId) {
+//     //   io.to(senderSocketId).emit('senderMessage', populatedMessage);
+//     // }
+
+//     const receiverSocketId = getReciverSocketId(receiverId);
+//     // const senderSocketId = getReciverSocketId(senderId)
+//     if (receiverSocketId) {
+//       io.to(receiverSocketId).emit('newMessage', populatedMessage);
+//     }
+
+//     // if (senderSocketId) {
+//     //   io.to(senderSocketId).emit('senderMessage', populatedMessage);
+//     // }
+
+
+//     res.status(200).json({ success: true, newMessage: populatedMessage });
+//   } catch (error) {
+//     console.log(error.message);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
 const sendMessage = async (req, res) => {
-  try {
-    const { textMessage: message, senderId, messageType } = req.body;
-    const receiverId = req.params.id;
+    try {
+        const { textMessage: message, senderId, messageType } = req.body;
+        const receiverId = req.params.id;
 
-    let mediaUrl = '';
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "auto", 
-      });
-      mediaUrl = result.secure_url;
+        let mediaUrl = '';
+        if (req.file) {
+            // Upload media to Cloudinary if it exists
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                resource_type: "auto",
+            });
+            mediaUrl = result.secure_url;
+        }
+
+        // Find or create a conversation between the two users
+        let conversation = await Conversation.findOne({
+            participants: { $all: [senderId, receiverId] }
+        });
+
+        if (!conversation) {
+            conversation = await Conversation.create({
+                participants: [senderId, receiverId],
+            });
+        }
+
+        // Create the new message document
+        const newMessage = await Message.create({
+            senderId,
+            reciverId: receiverId,
+            message: messageType === 'text' ? message : undefined,
+            mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
+            messageType,
+        });
+
+        // Update the conversation with the last message details
+        conversation.messages.push(newMessage._id);
+        conversation.lastMessage = {
+            messageId: newMessage._id,
+            text: messageType === 'text' ? message : `[${messageType}]`,
+            senderId,
+            createdAt: newMessage.createdAt,
+        };
+        conversation.updatedAt = new Date();
+        await conversation.save();
+
+        // --- REAL-TIME LOGIC ---
+
+        // Populate sender and receiver details for the payload
+        const popMessage = await Message.findById(newMessage._id)
+            .populate('senderId', 'username fullName profilePicture')
+            .populate('reciverId', 'username fullName profilePicture');
+        
+        const populatedMessage = popMessage.toObject();
+
+        // Get the receiver's socket ID
+        const receiverSocketId = getReciverSocketId(receiverId);
+
+        if (receiverSocketId) {
+            // 1. Create the updated conversation object for the receiver's sidebar
+            const updatedConversationForReceiver = {
+                _id: populatedMessage.senderId._id, // The ID of the conversation is the sender's ID for the receiver
+                username: populatedMessage.senderId.username,
+                name: populatedMessage.senderId.fullName,
+                profilePicture: populatedMessage.senderId.profilePicture,
+                lastMessage: {
+                    text: messageType === 'text' ? message : `[${messageType.charAt(0).toUpperCase() + messageType.slice(1)}]`,
+                    createdAt: newMessage.createdAt,
+                }
+            };
+
+            // 2. Create the final payload to send via WebSocket
+            const payload = {
+                newMessage: populatedMessage,                      // For updating the chat window
+                updatedConversation: updatedConversationForReceiver // For updating the conversation list
+            };
+
+            // 3. Emit the event to the receiver
+            io.to(receiverSocketId).emit('newMessage', payload);
+        }
+
+        // --- HTTP RESPONSE ---
+
+        // Respond to the sender's original HTTP request with the new message.
+        // The sender's UI updates based on this response.
+        res.status(200).json({ success: true, newMessage: populatedMessage });
+
+    } catch (error) {
+        console.log("Error in sendMessage controller: ", error.message);
+        res.status(500).json({ error: 'Server error' });
     }
-
-    let conversation = await Conversation.findOne({
-      participants: { $all: [senderId, receiverId] }
-    });
-
-    if (!conversation) {
-      conversation = await Conversation.create({
-        participants: [senderId, receiverId],
-      });
-    }
-
-    const newMessage = await Message.create({
-      senderId,
-      reciverId: receiverId,
-      message: messageType === 'text' ? message : undefined,
-      mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
-      messageType,
-    });
-    console.log(newMessage);
-    conversation.messages.push(newMessage._id);
-    conversation.lastMessage = {
-      messageId: newMessage._id,
-      text: messageType === 'text' ? message : `[${messageType}]`,
-      senderId,
-      createdAt: newMessage.createdAt,
-    };
-    conversation.updatedAt = new Date();
-    await conversation.save();
-
-    // Populate the new message with sender and receiver details
-    const popMessage = await Message.findById(newMessage._id)
-      .populate('senderId', 'username profilePicture') // Populate sender details
-      .populate('reciverId', 'username profilePicture'); // Populate receiver details
-    const populatedMessage = popMessage.toObject();
-    populatedMessage.lastMessage = {
-      text: newMessage.message,
-      createdAt: newMessage.timestamp // use createdAt instead of timestamp
-    };
-    // console.log("populatedMessage  ", populatedMessage)
-    const receiverSocketId = getReciverSocketId(receiverId);
-    const senderSocketId = getReciverSocketId(senderId)
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('newMessage', populatedMessage);
-    }
-
-    if (senderSocketId) {
-      io.to(senderSocketId).emit('senderMessage', populatedMessage);
-    }
-
-    res.status(200).json({ success: true, newMessage: populatedMessage });
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ error: 'Server error' });
-  }
 };
+
 
 
 // For getting friends of a user
@@ -192,6 +296,78 @@ const getUserGroups = async (req, res) => {
 
 // controllers/conversationController.js (inside your module exports)
 
+// const sendGroupMessage = async (req, res) => {
+//   try {
+//     const { senderId, textMessage: message, messageType } = req.body;
+//     const groupId = req.params.groupId;
+
+//     let mediaUrl = '';
+//     if (req.file) {
+//       const result = await cloudinary.uploader.upload(req.file.path, { resource_type: "auto" });
+//       mediaUrl = result.secure_url;
+//     }
+
+//     const groupChat = await GroupChat.findById(groupId).populate({
+//       path: 'members.userId',
+//       select: 'username profilePicture', // Include necessary fields for socket/FE update
+//     });
+
+//     if (!groupChat) {
+//       return res.status(404).json({ error: 'Group chat not found' });
+//     }
+
+//     const newMessage = await Message.create({
+//       senderId,
+//       groupId,
+//       message: messageType === 'text' ? message : undefined,
+//       mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
+//       messageType
+//     });
+
+//     const conversation = await Conversation.findOne({ group: groupId });
+//     if (!conversation) return res.status(404).json({ error: "Conversation not found" });
+
+//     conversation.messages.push(newMessage._id);
+//     conversation.lastMessage = {
+//       messageId: newMessage._id,
+//       text: messageType === 'text' ? message : `[${messageType}]`,
+//       senderId,
+//       createdAt: newMessage.timestamp // Use newMessage.timestamp or createdAt
+//     };
+//     conversation.updatedAt = new Date();
+//     await conversation.save();
+
+//     groupChat.messages.push({
+//       senderId,
+//       message: messageType === 'text' ? message : undefined,
+//       mediaUrl: messageType !== 'text' ? mediaUrl : undefined,
+//       messageType,
+//       timestamp: newMessage.timestamp
+//     });
+//     groupChat.updatedAt = new Date();
+//     await groupChat.save();
+
+//     const popMessage = await Message.findById(newMessage._id).populate('senderId', 'username profilePicture');
+//     const newMsg = popMessage.toObject();
+
+//     newMsg.groupName = groupChat.groupName;
+//     newMsg.groupImage = groupChat.groupImage;
+//     newMsg.groupId = groupId;
+
+//     groupChat.members.forEach(m => {
+//       const memberId = m.userId._id.toString();
+//       const socketId = getReciverSocketId(memberId);
+//       if (socketId) io.to(socketId).emit('sendGroupMessage', newMsg);
+//     });
+
+//     res.status(201).json({ success: true, newMessage: newMsg });
+
+//   } catch (error) {
+//     console.error("Error in sendGroupMessage:", error.message);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
 const sendGroupMessage = async (req, res) => {
   try {
     const { senderId, textMessage: message, messageType } = req.body;
@@ -207,7 +383,7 @@ const sendGroupMessage = async (req, res) => {
       path: 'members.userId',
       select: 'username profilePicture', // Include necessary fields for socket/FE update
     });
-    
+
     if (!groupChat) {
       return res.status(404).json({ error: 'Group chat not found' });
     }
@@ -245,19 +421,46 @@ const sendGroupMessage = async (req, res) => {
 
     const popMessage = await Message.findById(newMessage._id).populate('senderId', 'username profilePicture');
     const newMsg = popMessage.toObject();
-    
+
     newMsg.groupName = groupChat.groupName;
     newMsg.groupImage = groupChat.groupImage;
-    newMsg.groupId = groupId; 
+    newMsg.groupId = groupId;
+
+   // Create the updated conversation object for the sidebar
+    const updatedGroupConversation = {
+      _id: groupId,
+      groupName: groupChat.groupName,
+      groupImage: groupChat.groupImage,
+      members: groupChat.members, // You can include this if needed by the client
+      lastMessage: {
+        text: messageType === 'text' ? message : `[${messageType.charAt(0).toUpperCase() + messageType.slice(1)}]`,
+        createdAt: newMessage.createdAt
+      }
+    };
     
+    const payload = {
+        newMessage: newMsg,
+        updatedConversation: updatedGroupConversation
+    };
+    
+    // Emit the new payload to all group members
     groupChat.members.forEach(m => {
       const memberId = m.userId._id.toString(); 
       const socketId = getReciverSocketId(memberId);
-      if (socketId) io.to(socketId).emit('sendGroupMessage', newMsg);
+      if (socketId) {
+        // Don't send the sidebar update to the original sender to avoid conflicts
+        if (memberId === senderId) {
+          io.to(socketId).emit('sendGroupMessage', { newMessage: newMsg });
+        } else {
+          io.to(socketId).emit('sendGroupMessage', payload);
+        }
+      }
     });
+
+    // --- END MODIFICATION ---
     
     res.status(201).json({ success: true, newMessage: newMsg });
-    
+
   } catch (error) {
     console.error("Error in sendGroupMessage:", error.message);
     res.status(500).json({ error: 'Server error' });

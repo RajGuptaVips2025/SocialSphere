@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { setMessages, setSuggestedUser } from '../../features/userDetail/userDetailsSlice';
+import { setFollowingUsers, setMessages, setSuggestedUser } from '../../features/userDetail/userDetailsSlice';
 import { AiOutlineMessage } from 'react-icons/ai';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
@@ -36,6 +36,7 @@ function ChatBox() {
     }, [suggestedUser]);
     const userDetails = useSelector((state) => state.counter.userDetails);
     const messages = useSelector((state) => state.counter.messages);
+    const followingUsers = useSelector((state) => state.counter.followingUsers); // <-- ADD THIS LINE
     const [textMessage, setTextMessage] = useState('')
     const [file, setFile] = useState(null); // Store file
     const [filePreview, setFilePreview] = useState(null);
@@ -143,10 +144,43 @@ function ChatBox() {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
+            // if (response.data.success) {
+            //     dispatch(setMessages([...messages, response.data.newMessage]));
+            //     setTextMessage('');
+            //     setFile(null);  // Reset file input after sending
+            //     setFilePreview(null);
+            // }
+
             if (response.data.success) {
-                dispatch(setMessages([...messages, response.data.newMessage]));
+                const newMessage = response.data.newMessage;
+
+                // 1. Update the messages in the current chat window (this is existing code)
+                dispatch(setMessages([...messages, newMessage]));
+
+                // 2. Update the conversation list for the sidebar (NEW LOGIC)
+                const currentConversationId = suggestedUser._id;
+
+                // Filter out the conversation we just updated
+                const otherConversations = followingUsers.filter(convo => convo._id !== currentConversationId);
+
+                // Create an updated version of the current conversation object with the new last message
+                const updatedConversation = {
+                    ...suggestedUser,
+                    lastMessage: {
+                        text: newMessage.messageType === 'text' ? newMessage.message : `[${newMessage.messageType.charAt(0).toUpperCase() + newMessage.messageType.slice(1)}]`,
+                        createdAt: newMessage.createdAt,
+                    },
+                };
+
+                // Place the updated conversation at the top of the list
+                const newConversationList = [updatedConversation, ...otherConversations];
+
+                // Dispatch the action to update the UI
+                dispatch(setFollowingUsers(newConversationList));
+
+                // 3. Reset the form fields (this is existing code)
                 setTextMessage('');
-                setFile(null);  // Reset file input after sending
+                setFile(null);
                 setFilePreview(null);
             }
         } catch (error) {

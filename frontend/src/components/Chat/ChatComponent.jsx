@@ -50,62 +50,114 @@ export function ChatComponent({ socketRef }) {
   }, [id, followingusers])
 
   // ✅ Real-time socket message handling
+  // useEffect(() => {
+  //   if (!socketRef?.current) return
+
+  //   const handleNewMessage = (newMessage) => {
+  //     const senderId = newMessage.senderId._id
+  //     const filtered = convo.filter((user) => user._id !== senderId)
+  //     const updated = [
+  //       { ...newMessage.senderId, lastMessage: newMessage.lastMessage },
+  //       ...filtered,
+  //     ]
+  //     dispatch(setFollowingUsers(updated))
+
+  //     if (suggestedUser?._id === senderId) {
+  //       dispatch(setMessages([...messages, newMessage]))
+  //     }
+  //   }
+
+  //   const handleSenderMessage = (newMessage) => {
+  //     const reciverId = newMessage.reciverId._id
+  //     const filtered = convo.filter((user) => user._id !== reciverId)
+  //     const updated = [
+  //       { ...newMessage.reciverId, lastMessage: newMessage.lastMessage },
+  //       ...filtered,
+  //     ]
+  //     dispatch(setFollowingUsers(updated))
+  //     dispatch(setMessages([...messages, newMessage]))
+  //   }
+
+  //   const handleGroupMessage = (newMessage) => {
+  //     const groupId = newMessage.groupId
+  //     const filtered = convo.filter((user) => user._id !== groupId)
+  //     const updated = [
+  //       {
+  //         lastMessage: { text: newMessage.message, createdAt: newMessage.timestamp },
+  //         groupImage: "uploads/groupProfile.jpeg",
+  //         groupName: newMessage.groupName,
+  //         _id: groupId,
+  //       },
+  //       ...filtered,
+  //     ]
+  //     dispatch(setFollowingUsers(updated))
+  //     dispatch(setMessages([...messages, newMessage]))
+  //   }
+
+  //   // socketRef.current.on("newMessage", handleNewMessage)
+  //   // socketRef.current.on("senderMessage", handleSenderMessage)
+  //   // socketRef.current.on("sendGroupMessage", handleGroupMessage)
+
+  //   socketRef.current.on("newMessage", handleNewMessage)
+  //   // socketRef.current.on("senderMessage", handleSenderMessage)
+  //   socketRef.current.on("sendGroupMessage", handleGroupMessage)
+
+  //   return () => {
+  //     if (socketRef?.current) {
+  //       socketRef.current.off("newMessage", handleNewMessage)
+  //       // socketRef.current.off("senderMessage", handleSenderMessage)
+  //       socketRef.current.off("sendGroupMessage", handleGroupMessage)
+  //     }
+  //   }
+  // }, [messages, convo, suggestedUser])
+
   useEffect(() => {
-    if (!socketRef?.current) return
+    if (!socketRef?.current) return;
 
-    const handleNewMessage = (newMessage) => {
-      const senderId = newMessage.senderId._id
-      const filtered = convo.filter((user) => user._id !== senderId)
-      const updated = [
-        { ...newMessage.senderId, lastMessage: newMessage.lastMessage },
-        ...filtered,
-      ]
-      dispatch(setFollowingUsers(updated))
+    // ✅ Handles incoming messages from other users
+    const handleNewMessage = (payload) => {
+      const { newMessage, updatedConversation } = payload;
 
-      if (suggestedUser?._id === senderId) {
-        dispatch(setMessages([...messages, newMessage]))
+      // Update the conversation list
+      if (updatedConversation) {
+        const filtered = convo.filter((user) => user._id !== updatedConversation._id);
+        const updatedList = [updatedConversation, ...filtered];
+        dispatch(setFollowingUsers(updatedList));
       }
-    }
 
-    const handleSenderMessage = (newMessage) => {
-      const reciverId = newMessage.reciverId._id
-      const filtered = convo.filter((user) => user._id !== reciverId)
-      const updated = [
-        { ...newMessage.reciverId, lastMessage: newMessage.lastMessage },
-        ...filtered,
-      ]
-      dispatch(setFollowingUsers(updated))
-      dispatch(setMessages([...messages, newMessage]))
-    }
+      // Add message to the screen ONLY if the chat is currently open
+      if (suggestedUser?._id === newMessage.senderId._id) {
+        dispatch(setMessages([...messages, newMessage]));
+      }
+    };
 
-    const handleGroupMessage = (newMessage) => {
-      const groupId = newMessage.groupId
-      const filtered = convo.filter((user) => user._id !== groupId)
-      const updated = [
-        {
-          lastMessage: { text: newMessage.message, createdAt: newMessage.timestamp },
-          groupImage: "uploads/groupProfile.jpeg",
-          groupName: newMessage.groupName,
-          _id: groupId,
-        },
-        ...filtered,
-      ]
-      dispatch(setFollowingUsers(updated))
-      dispatch(setMessages([...messages, newMessage]))
-    }
+    // ✅ Handles incoming group messages
+    const handleGroupMessage = (payload) => {
+      const { newMessage, updatedConversation } = payload;
 
-    socketRef.current.on("newMessage", handleNewMessage)
-    socketRef.current.on("senderMessage", handleSenderMessage)
-    socketRef.current.on("sendGroupMessage", handleGroupMessage)
+      // Update conversation list (only for receivers)
+      if (updatedConversation) {
+        const filtered = convo.filter((user) => user._id !== updatedConversation._id);
+        const updatedList = [updatedConversation, ...filtered];
+        dispatch(setFollowingUsers(updatedList));
+      }
+
+      // Add message to the screen ONLY if the group chat is currently open
+      if (suggestedUser?._id === newMessage.groupId) {
+        dispatch(setMessages([...messages, newMessage]));
+      }
+    };
+
+    socketRef.current.on("newMessage", handleNewMessage);
+    socketRef.current.on("sendGroupMessage", handleGroupMessage);
 
     return () => {
       if (socketRef?.current) {
-        socketRef.current.off("newMessage", handleNewMessage)
-        socketRef.current.off("senderMessage", handleSenderMessage)
-        socketRef.current.off("sendGroupMessage", handleGroupMessage)
+        socketRef.current.off("newMessage", handleNewMessage);
+        socketRef.current.off("sendGroupMessage", handleGroupMessage);
       }
-    }
-  }, [messages, convo, suggestedUser])
+    };
+  }, [messages, convo, suggestedUser]); // Keep dependencies up-to-date
 
   // ✅ Initial data fetch
   useEffect(() => {
@@ -151,9 +203,8 @@ export function ChatComponent({ socketRef }) {
         <Sidebar compact />
         {/* Left Sidebar — Members */}
         <div
-          className={`${
-            suggestedUser ? "w-0" : "w-full"
-          } md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}
+          className={`${suggestedUser ? "w-0" : "w-full"
+            } md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}
         >
           <div className="p-4 border-gray-200 dark:border-zinc-800 flex justify-between items-center">
             <span className="font-semibold dark:text-white">{userDetails.username}</span>
