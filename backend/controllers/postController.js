@@ -4,9 +4,76 @@ const User = require('../models/userSchema');
 const cloudinary = require('../config/cloudinary'); // Import Cloudinary
 const fs = require('fs'); // To delete files after upload
 const { getReciverSocketId, io } = require('../socket/socket');
+const Datauri = require('datauri/parser'); // <--- Correct import for the parser class
+const parser = new Datauri(); // <--- Initialize the parser
+const path = require('path');
+
+// Helper function to create the Data URI from the file buffer
+const dataUriFromBuffer = (file) => {
+  // path.extname gets the file extension (e.g., .jpg)
+  return parser.format(path.extname(file.originalname).toString(), file.buffer);
+};
+
+// const createPost = async (req, res) => {
+//   try {
+//     const { caption, author } = req.body;
+
+//     if (!req.files || req.files.length === 0) {
+//       return res.status(400).json({ error: 'No files uploaded' });
+//     }
+
+//     const mediaDetails = [];
+
+//     // Loop through each uploaded file and upload to Cloudinary
+//     for (let file of req.files) {
+//       let result;
+//       try {
+//         result = await cloudinary.uploader.upload(file.path, {
+//           folder: 'posts',
+//           resource_type: 'auto',
+//         });
+//       } catch (error) {
+//         console.error('Cloudinary upload failed:', error.message);
+//         return res.status(500).json({ error: 'Failed to upload to Cloudinary' });
+//       }
+
+//       mediaDetails.push({
+//         mediaType: file.mimetype.startsWith('image') ? 'image' : 'video',
+//         mediaPath: result.secure_url,
+//         imageWidth: result.width,
+//         imageHeight: result.height,
+//       });
+
+//       fs.unlinkSync(file.path);
+//     }
+
+//     const newPost = new Post({
+//       caption,
+//       media: mediaDetails, // Save multiple media objects
+//       author,
+//     });
+
+//     const user = await User.findById(author);
+//     if (!user) {
+//       return res.status(404).json({ error: 'User not found' });
+//     }
+
+//     user.posts.push(newPost._id);
+//     await user.save();
+//     await newPost.save();
+
+//     res.status(201).json({ newPost });
+//   } catch (error) {
+//     console.error('Error creating post:', error.message);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
 
 const createPost = async (req, res) => {
   try {
+    // Since Multer is using memoryStorage, the file properties change slightly.
+    // The file buffer is now available at file.buffer, not file.path.
     const { caption, author } = req.body;
 
     if (!req.files || req.files.length === 0) {
@@ -17,35 +84,49 @@ const createPost = async (req, res) => {
 
     // Loop through each uploaded file and upload to Cloudinary
     for (let file of req.files) {
+
+      // 1. Generate the Data URI from the in-memory file buffer
+      const dataUri = dataUriFromBuffer(file);
+
       let result;
       try {
-        result = await cloudinary.uploader.upload(file.path, {
+        // 2. Upload the Data URI string using its .content property
+        // This bypasses the need to read a file from the ephemeral disk
+        result = await cloudinary.uploader.upload(dataUri.content, {
           folder: 'posts',
-          resource_type: 'auto',
+          resource_type: 'auto', // Important for handling both images and videos
         });
       } catch (error) {
+        // If Cloudinary fails, log the error and return 500
         console.error('Cloudinary upload failed:', error.message);
         return res.status(500).json({ error: 'Failed to upload to Cloudinary' });
       }
 
+      // 3. Collect media details from the successful Cloudinary response
       mediaDetails.push({
-        mediaType: file.mimetype.startsWith('image') ? 'image' : 'video',
+        // Cloudinary result.resource_type is more reliable than file.mimetype
+        mediaType: result.resource_type,
         mediaPath: result.secure_url,
         imageWidth: result.width,
         imageHeight: result.height,
       });
 
-      fs.unlinkSync(file.path);
+      // REMOVED: fs.unlinkSync(file.path); 
+      // The file was never written to the disk, so no need to delete it.
     }
 
+    // Create new Post object
     const newPost = new Post({
       caption,
       media: mediaDetails, // Save multiple media objects
       author,
     });
 
+    // Find and update the user's posts array
     const user = await User.findById(author);
     if (!user) {
+      // Note: Cloudinary uploads are permanent unless deleted. 
+      // In a real application, you might want to clean up the uploads if user is not found.
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -56,6 +137,7 @@ const createPost = async (req, res) => {
     res.status(201).json({ newPost });
   } catch (error) {
     console.error('Error creating post:', error.message);
+    // The final catch block handles any error that wasn't explicitly caught above
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

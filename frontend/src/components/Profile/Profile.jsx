@@ -93,9 +93,7 @@ const Profile = () => {
       await api.post('/auth/logout');
 
       navigate('/login'); // Redirect to login page
-      toast.info("Logged out successfully!", {
-        autoClose: 1000, // 1 second
-      });
+      toast.info("Logged out successfully!"); // Optional toast notification
     } catch (error) {
       console.error('Error during logout:', error.message);
     }
