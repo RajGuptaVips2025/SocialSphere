@@ -6,7 +6,7 @@ import Cookies from 'js-cookie';
 import api from '@/api/api';
 import { useDispatch } from 'react-redux';
 import { addUser } from '@/features/userDetail/userDetailsSlice';
-import { InstagramProfileSkeletonComponent } from '../Profile/instagram-profile-skeleton';
+import { InstagramSkeletonComponent } from '../Home/instagram-skeleton';
 
 const ProtectedRoute = ({ children }) => {
   const [checking, setChecking] = useState(true);
@@ -51,7 +51,7 @@ const ProtectedRoute = ({ children }) => {
   if (checking) {
     // show a loader while validating
     // return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
-    return <InstagramProfileSkeletonComponent/>
+    return <InstagramSkeletonComponent />;
   }
 
   if (!allowed) {
