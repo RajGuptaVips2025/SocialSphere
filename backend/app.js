@@ -21,23 +21,56 @@ const isProduction = process.env.NODE_ENV === 'production';
 connectDB();
 
 // ✅ CORS setup
-const allowedOrigins = [
-  process.env.FRONTEND_PROD_URL, // e.g. https://instagram-frontend.onrender.com
-  process.env.FRONTEND_DEV_URL   // e.g. http://localhost:5173
-];
+// const allowedOrigins = [
+//   process.env.FRONTEND_PROD_URL, // e.g. https://instagram-frontend.onrender.com
+//   process.env.FRONTEND_DEV_URL   // e.g. http://localhost:5173
+// ];
 
-app.use(cors({
+const allowedOrigins = [
+  process.env.FRONTEND_PROD_URL || 'https://instagram-frontend-j39q.onrender.com',
+  process.env.FRONTEND_DEV_URL  || 'http://localhost:5173'
+].filter(Boolean);
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin) return callback(null, true); // Allow Postman / local scripts
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     } else {
+//       return callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true, // ✅ Allow cookies and auth headers
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+// }));
+
+const allowedSet = new Set(allowedOrigins);
+
+const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Allow Postman / local scripts
-    if (allowedOrigins.includes(origin)) {
+    // allow requests from tools (curl/postman) or server-to-server (no origin)
+    if (!origin) return callback(null, true);
+
+    // Accept explicit allowed origins OR allow any onrender.com subdomain if you prefer
+    const isAllowed = allowedSet.has(origin) || origin.endsWith('.onrender.com');
+    if (isAllowed) {
       return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
     }
+
+    console.warn(`CORS blocked attempt from origin: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
   },
-  credentials: true, // ✅ Allow cookies and auth headers
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-}));
+  credentials: true, // allow cookies & auth headers
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 204
+};
+
+// apply CORS
+app.use(cors(corsOptions));
+
+// ensure preflight requests are handled for all routes
+app.options('*', cors(corsOptions));
 
 // ✅ Middlewares
 app.use(express.json());
