@@ -91,7 +91,7 @@ const ExploreGrid = () => {
 
       <motion.div
         // className="flex-1  dark:bg-neutral-950 min-h-screen grid grid-cols-3 gap-1 md:px-12 py-5 md:py-12 ml-auto"
-        className="flex-1 dark:bg-neutral-950 min-h-screen grid grid-cols-3 gap-1 md:px-12 py-5 md:py-12 ml-auto pt-20 md:pt-20 lg:pt-20"
+        className="flex-1 bg-[#0f172a] dark:bg-[#0f172a] min-h-screen grid grid-cols-3 gap-1 md:px-12 py-5 md:py-12 ml-auto pt-20 md:pt-20 lg:pt-20"
 
         initial="hidden"
         animate="visible"

@@ -67,7 +67,8 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
       transition={{ duration: 0.5 }}
       className="space-y-8 mb-4"
     >
-      <Card key={post._id} className="w-full border-t-0 border-x-0 rounded-none border-b-[.1px] border-zinc-300 shadow-none">
+      {/* <Card key={post._id} className="w-full bg-[#1e293b] border-none rounded-md shadow-none"> */}
+      <Card key={post._id} className="w-full bg-[#1e293b] dark:bg-[#1e293b] border-none rounded-md shadow-none">
         <CardHeader className="flex flex-row items-center space-x-4 px-0 py-4">
           <Link to={`/profile/${post?.author?.username}`}>
             <Avatar>
@@ -77,12 +78,9 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
           </Link>
           <div className="flex flex-grow gap-4">
             <div className="flex flex-col">
-              <Link to={`/profile/${post?.author?.username}`}>
-                <p className="text-sm font-semibold">{post?.author?.username}</p>
+              <Link className="text-white" to={`/profile/${post?.author?.username}`}>
+                <p className="text-sm font-light">{post?.author?.username}</p>
               </Link>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                {post?.author?.username}
-              </p>
             </div>
             <button onClick={(e) => handleFollowing(e, post.author._id)}>
               <h2 className="text-sm font-semibold text-sky-400 hover:text-sky-700">
@@ -92,8 +90,8 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="w-5 h-5" />
+              <Button className="hover:bg-transparent" variant="ghost" size="icon">
+                <MoreHorizontal className="w-5 h-5 text-white "/>
               </Button>
             </DropdownMenuTrigger>
 
@@ -108,8 +106,6 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                 exit={{ opacity: 0, y: -10, scale: 0.98 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
               >
-
-
                 {userDetails?.id === post?.author?._id && (
                   <>
                     <DropdownMenuItem
@@ -163,8 +159,8 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                 {post.media.map((mediaItem, index) => (
                   <CarouselItem key={index}>
                     <div className="p-1">
-                      <Card className="rounded-sm">
-                        <CardContent onDoubleClick={(e) => handleLike(e, post._id)} className="p-0 relative border-[.1px] h-[80vh] border-zinc-300 dark:border-zinc-800 rounded-sm overflow-hidden flex justify-center items-center">
+                      <Card className="rounded-sm border-none bg-transparent">
+                        <CardContent onDoubleClick={(e) => handleLike(e, post._id)} className="p-0 relative h-[80vh] rounded-sm overflow-hidden flex justify-center items-center">
                           {mediaItem?.mediaType === 'video' ? (
                             <>
                               <video
@@ -210,7 +206,7 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
           )
           :
           (
-            <CardContent onDoubleClick={(e) => handleLike(e, post._id)} className="p-0 relative border-[.1px] h-[80vh] border-zinc-300 dark:border-zinc-800 rounded-sm overflow-hidden flex justify-center items-center">
+            <CardContent onDoubleClick={(e) => handleLike(e, post._id)} className="p-0 relative  h-[80vh]  rounded-sm overflow-hidden flex justify-center items-center">
               {post?.media[0]?.mediaType === 'video' ? (
                 <>
                   <video
@@ -273,6 +269,7 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
                   onClick={(e) => showComments(e, post)}
                   variant="ghost"
                   size="icon"
+                  className="hover:bg-transparent"
                 >
                   <MessageCircle className="w-6 h-6 -rotate-90" />
                 </Button>
@@ -291,7 +288,7 @@ const Post = ({ post, userDetails, savedPost, followingUserss, handleLike, handl
 
           <motion.button
             onClick={(e) => showComments(e, post)}
-            className="text-sm text-neutral-500 dark:text-neutral-400 hover:text-zinc-700"
+            className="text-sm neutral-400 hover:text-zinc-700"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35, duration: 0.3 }}

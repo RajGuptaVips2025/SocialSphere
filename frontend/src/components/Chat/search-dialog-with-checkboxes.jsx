@@ -94,11 +94,15 @@ export function SearchDialogWithCheckboxesComponent({ socketRef }) {
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 300, damping: 15 }}
         >
-          <Button variant="outline" className="px-2"><FaRegEdit size={20} /></Button>
+          {/* <Button variant="outline" className="px-2"><FaRegEdit size={20} /></Button> */}
+          <Button variant="ghost" className="px-2 hover:bg-slate-700 dark:hover:bg-slate-700">
+            <FaRegEdit size={20} className="text-white" />
+          </Button>
         </motion.div>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[600px] h-[80vh] md:h-[500px] max-h-[90vh] flex flex-col overflow-hidden">
+        {/* <DialogContent className="sm:max-w-[600px] h-[80vh] md:h-[500px] max-h-[90vh] flex flex-col overflow-hidden bg-[#0f172a] border-slate-700 text-white"> */}
         <AnimatePresence>
           {isOpen && (
             <motion.div

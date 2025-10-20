@@ -252,7 +252,7 @@ const ReelSection = () => {
     
     return (
         <>
-        <div className="flex-1 min-h-screen flex flex-col items-center pt-24 pb-4 dark:bg-neutral-950 dark:text-white">
+        <div className="flex-1 min-h-screen flex flex-col items-center pt-24 pb-4 bg-[#0f172a] dark:bg-[#0f172a] text-white">
             <div className="w-full flex justify-center mt-4">
                 <Carousel opts={{ align: "center" }} orientation="vertical" className="relative w-full max-w-sm md:max-w-md lg:max-w-lg">
                     <CarouselContent className="h-[95vh] gap-4">

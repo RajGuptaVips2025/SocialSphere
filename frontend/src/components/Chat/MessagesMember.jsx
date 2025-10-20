@@ -16,7 +16,7 @@ function MessagesMember({ socketRef }) {
   }
 
   return (
-    <ScrollArea className="flex-grow">
+    <ScrollArea className="flex-grow bg-[#0f172a]">
       <AnimatePresence>
         {followingUsers.map((suggestedUser) => (
           <Link
@@ -30,7 +30,7 @@ function MessagesMember({ socketRef }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.24 }}
-              className="flex items-center space-x-3 p-3 hover:bg-gray-100 dark:hover:bg-neutral-700 cursor-pointer rounded-lg"
+              className="flex items-center space-x-3 p-3 hover:hover:bg-slate-700 dark:hover:bg-slate-700 cursor-pointer rounded-lg"
             >
               {/* avatar + content */}
               <div className="relative">
@@ -52,7 +52,7 @@ function MessagesMember({ socketRef }) {
 
               <div className="flex-grow">
                 <div className="flex flex-col p-2 rounded-lg">
-                  <span className="font-semibold text-black dark:text-white truncate">
+                  <span className="font-normal text-white dark:text-white truncate">
                     {'groupName' in suggestedUser ? suggestedUser.groupName : suggestedUser.username}
                   </span>
 

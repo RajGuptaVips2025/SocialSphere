@@ -89,7 +89,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
               className="
                 fixed top-1/2 left-1/2 
                 -translate-x-1/2 -translate-y-1/2 
-                border-none shadow-none 
+                bg-[#1e293b] dark:bg-[#1e293b border-none shadow-none 
                 w-[90vw] max-w-[1200px] h-[90vh]
                 flex justify-center items-center
                 sm:rounded-sm overflow-hidden
@@ -108,7 +108,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
                     {/* Left side - Media - FIXED: w-3/5 for 60% width */}
                     <div 
                     // className="multimedia w-3/5 h-full bg-neutral-950"
-                    className="multimedia w-full sm:w-3/5 h-[60vh] sm:h-full bg-neutral-950"
+                    className="multimedia w-full sm:w-3/5 h-[60vh] sm:h-full bg-black"
                     >
                       {selectedMedia?.media?.length > 1 ? (
                         <Carousel className="w-full h-full">
@@ -118,7 +118,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
                                 <Card className="rounded-sm h-full flex justify-center items-center">
                                   <CardContent
                                     onDoubleClick={(e) => handleLike(e, PostDetails._id)}
-                                    className="p-0 relative border-[.1px] h-full w-full border-zinc-300 dark:border-zinc-800 rounded-sm overflow-hidden flex justify-center items-center"
+                                    className="p-0 relative  h-full w-full rounded-sm overflow-hidden flex justify-center items-center"
                                   >
                                     {mediaItem?.mediaType === 'video' ? (
                                       <>
@@ -189,7 +189,7 @@ function PostComment({ selectedMedia, isDialogOpen, setIsDialogOpen }) {
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ duration: 0.4, ease: "easeOut" }}
                       // className="w-2/5 h-full rounded-sm dark:bg-neutral-950 dark:text-white flex flex-col justify-between"
-                      className="w-full sm:w-2/5 h-full sm:h-full rounded-sm dark:bg-neutral-950 dark:text-white flex flex-col justify-between p-2 sm:p-4"
+                      className="w-full sm:w-2/5 h-full sm:h-full rounded-sm bg-[#1e293b] text-white flex flex-col justify-between p-2 sm:p-4"
                     >
                       {/* Author */}
                       <div className="author border-b-[.1px] border-zinc-800 w-full h-[70px] flex items-center px-4">

@@ -198,16 +198,21 @@ export function ChatComponent({ socketRef }) {
 
   return (
     // <div className="flex h-screen pt-16 md:pt-12 lg:pt-12">
-    <div className="flex h-screen w-screen bg-neutral-950 text-white pt-12 md:pt-12 lg:pt-12 overflow-hidden">
-      <div className="flex-1 flex dark:bg-neutral-950 dark:text-white">
+    <div className="flex h-screen w-screen bg-[#0f172a] text-white pt-12 md:pt-12 lg:pt-12 overflow-hidden">
+      <div className="flex-1 flex">
         <Sidebar compact />
         {/* Left Sidebar — Members */}
-        <div
+        {/* <div
           className={`${suggestedUser ? "w-0" : "w-full"
             } md:w-80 border-r border-gray-200 dark:border-zinc-800 flex flex-col bg-white dark:bg-neutral-950 dark:text-white`}
+        > */}
+        <div
+          className={`${suggestedUser ? "w-0" : "w-full"
+            } md:w-80 border-r border-slate-700 flex flex-col bg-[#0f172a] text-white`}
         >
-          <div className="p-4 border-gray-200 dark:border-zinc-800 flex justify-between items-center">
-            <span className="font-semibold dark:text-white">{userDetails.username}</span>
+          {/* <div className="p-4 border-gray-200 dark:border-zinc-800 flex justify-between items-center"> */}
+          <div className="p-4 border-b border-slate-700 flex justify-between items-center">
+            <span className="font-normal dark:text-white">{userDetails.username}</span>
             <div className="flex space-x-2">
               <SearchMessageComponent socketRef={socketRef} />
               <SearchDialogWithCheckboxesComponent socketRef={socketRef} />
@@ -215,7 +220,8 @@ export function ChatComponent({ socketRef }) {
           </div>
 
           <div className="flex justify-between items-center px-4 py-2 border-gray-200 dark:border-gray-700">
-            <span className="font-semibold text-black dark:text-white">Messages</span>
+            {/* <span className="font-semibold text-black dark:text-white">Messages</span> */}
+            <span className="font-semibold text-white">Messages</span>
           </div>
 
           <MessagesMember socketRef={socketRef} />

@@ -85,8 +85,8 @@ function SearchMessageComponent() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="dark:text-white">
-          <Search className="h-5 w-5" />
+        <Button variant="ghost" size="sm" className="dark:text-white hover:text-white hover:bg-slate-700 dark:hover:bg-slate-700">
+          <Search className="h-5 w-5 " />
         </Button>
       </DialogTrigger>
 

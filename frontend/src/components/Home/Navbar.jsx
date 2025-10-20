@@ -262,8 +262,11 @@ function Navbar({ compact = false }) {
 
     return (
         <>
+            {/* <nav
+                className={`fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-2 border-b border-black dark:border-zinc-800 bg-[#1e293b] text-white dark:bg-neutral-950`}
+            > */}
             <nav
-                className={`fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-2 border-b border-zinc-300 dark:border-zinc-800 bg-white dark:text-white dark:bg-neutral-950`}
+                className={`fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-2 border-b border-slate-700 bg-[#1e293b] text-white`}
             >
                 <Link to="/" className="flex items-center gap-2">
                     <IoEarthSharp className="text-purple-500 w-8 h-8" />
@@ -283,18 +286,26 @@ function Navbar({ compact = false }) {
                                         <SheetTrigger asChild>
                                             <div />
                                         </SheetTrigger>
+                                        {/* <SheetContent
+                                            side="right"
+                                            className="w-[300px] sm:w-[400px] p-0  text-white border-slate-700 border-l-[.2px] rounded-tl-3xl rounded-bl-3xl transition-transform duration-300 flex flex-col"
+                                        > */}
                                         <SheetContent
                                             side="right"
-                                            className="w-[300px] sm:w-[400px] p-0 bg-white dark:bg-neutral-950 dark:text-white border-l-[.2px] border-zinc-800 rounded-tl-3xl rounded-bl-3xl transition-transform duration-300 flex flex-col"
+                                            className="w-[300px] sm:w-[400px] p-0 bg-[#1e293b] text-black dark:bg-[#1e293b] dark:text-white border-l border-zinc-200 dark:border-slate-700 rounded-tl-3xl rounded-bl-3xl transition-transform duration-300 flex flex-col"
                                         >
-                                            <div className="p-4 border-b dark:border-zinc-800">
+                                            {/* <div className="p-4 border-b dark:border-zinc-800"> */}
+                                            <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
                                                 <h2 className="font-semibold text-lg mb-4">Search</h2>
                                                 <input
                                                     type="text"
                                                     value={query}
                                                     onChange={handleSearchChange}
                                                     placeholder="Search users"
-                                                    className="w-full p-2 rounded-md border dark:border-zinc-800 bg-white dark:bg-neutral-950 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+                                                    // className="w-full p-2 rounded-md border dark:border-zinc-800 bg-white dark:bg-neutral-950 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+
+                                                    className="w-full p-2 rounded-md border border-zinc-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+
                                                 />
                                             </div>
                                             <ScrollArea className="flex-1">
@@ -305,7 +316,8 @@ function Navbar({ compact = false }) {
                                                                 to={`/profile/${user.username}`}
                                                                 key={user._id}
                                                                 onClick={() => setIsSearchOpen(false)}
-                                                                className="flex items-center gap-3 py-3 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                                                                // className="flex items-center gap-3 py-3 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+                                                                className="flex items-center gap-3 py-3 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg transition-colors"
                                                             >
                                                                 <Avatar className="w-12 h-12">
                                                                     <AvatarImage src={user.profilePicture} alt={user.username} />
@@ -331,10 +343,10 @@ function Navbar({ compact = false }) {
                                 <>
                                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                         <DialogTrigger asChild>
-                                            <div className="flex items-center gap-2 cursor-pointer">
-                                                <span>{link.icon}</span>
+                                            <Button variant="ghost" className="flex items-center gap-2">
+                                                <span className="w-6 h-6">{link.icon}</span>
                                                 {!compact && <span className="hidden lg:inline">{link.label}</span>}
-                                            </div>
+                                            </Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[800px] h-auto">
                                             <DialogHeader>
@@ -568,7 +580,7 @@ function Navbar({ compact = false }) {
                                 <Menu className="w-6 h-6" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="w-[260px] bg-white dark:bg-neutral-950 dark:text-white p-4">
+                        <SheetContent side="right" className="w-[260px] bg-[#1e293b] dark:bg-[#1e293b] text-white border-slate-700 p-4">
                             <h2 className="font-semibold text-lg mb-4">Menu</h2>
                             <div className="flex flex-col space-y-3">
                                 {links.map((link) => (
@@ -618,7 +630,7 @@ function Navbar({ compact = false }) {
                 </SheetTrigger>
                 <SheetContent
                     side="bottom"
-                    className="w-full p-4 bg-white dark:bg-neutral-950 dark:text-white border-t-[.2px] border-zinc-800 rounded-tr-3xl rounded-tl-3xl transition-transform duration-300"
+                    className="w-full p-4 bg-[#1e293b] text-white border-slate-700 border-t-[.2px]  rounded-tr-3xl rounded-tl-3xl transition-transform duration-300"
                 >
                     <h2 className="font-semibold text-lg mb-4">Search</h2>
                     <input

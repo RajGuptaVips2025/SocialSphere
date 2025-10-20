@@ -267,8 +267,9 @@ function ChatBox() {
     };
     return (
         <>
-            {suggestedUser ?
-                (<div className={`flex-grow ${suggestedUser ? "w-[90vw] md:w-full" : "w-0"} flex flex-col max-h-screen bg-white dark:bg-neutral-950 dark:text-white`}>
+            {suggestedUser ? (
+                // <div className={`flex-grow ${suggestedUser ? "w-[90vw] md:w-full" : "w-0"} flex flex-col max-h-screen bg-white dark:bg-neutral-950 dark:text-white`}>
+                <div className={`flex-grow ${suggestedUser ? "w-[90vw] md:w-full" : "w-0"} flex flex-col max-h-screen bg-[#0f172a] text-white`}>
                     <div
                         className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
                         <div className="flex items-center space-x-3">
@@ -279,15 +280,15 @@ function ChatBox() {
                             </Avatar>
                             <div>
                                 <Link to={`/profile/${suggestedUser?.username}`}>
-                                    <p className="font-semibold text-xs md:text-sm dark:text-white">{suggestedUser && 'groupName' in suggestedUser ? suggestedUser?.groupName : suggestedUser?.username}</p>
+                                    <p className="font-normal text-xs md:text-sm dark:text-white">{suggestedUser && 'groupName' in suggestedUser ? suggestedUser?.groupName : suggestedUser?.username}</p>
                                 </Link>
                             </div>
                         </div>
                         <div className="flex">
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="text-black dark:text-white hidden md:block">
-                                        <Info className="h-6 w-6" />
+                                    <Button variant="ghost" size="sm" className="text-white dark:text-white hover:text-white hidden md:block hover:bg-slate-700 dark:hover:bg-slate-700">
+                                        <Info className="h-6 w-6 " />
                                     </Button>
                                 </SheetTrigger>
                                 <SheetContent side="right" className="p-6 bg-white dark:bg-gray-900">
@@ -507,6 +508,7 @@ function ChatBox() {
                                     {!(message.senderId?._id === userDetails.id || message.senderId === userDetails.id) && (
                                         <div className="image">
                                             <Avatar className="w-5 h-5 bg-red-400">
+                                            {/* <Avatar className="w-5 h-5 bg-slate-600"> */}
                                                 <AvatarImage
                                                     src={message?.senderId?.profilePicture}
                                                     className="w-full h-full rounded-full object-top object-cover"
@@ -537,8 +539,10 @@ function ChatBox() {
                                         {message.messageType === "text" && (
                                             <p
                                                 className={`px-3 py-2 rounded-full break-words max-w-sm text-sm ${message.senderId?._id === userDetails.id || message.senderId === userDetails.id
+                                                    // ? "bg-blue-400 text-white"
+                                                    // : "bg-neutral-100 dark:bg-zinc-800 dark:text-white"
                                                     ? "bg-blue-400 text-white"
-                                                    : "bg-neutral-100 dark:bg-zinc-800 dark:text-white"
+                                                    : "bg-slate-700 text-white"
                                                     }`}
                                             >
                                                 {message.message}
@@ -568,7 +572,7 @@ function ChatBox() {
                         )}
                     </ScrollArea >
                     <div className="px-0 md:px-4 pb-2">
-                        <div className="message-form p-2 dark:bg-neutral-950 rounded-lg space-y-2">
+                        <div className="message-form p-2  rounded-lg space-y-2">
                             {/* Media Preview Section */}
                             {filePreview && (
                                 <div className="relative w-20 h-20">
@@ -598,9 +602,13 @@ function ChatBox() {
                             )}
 
                             {/* Form Input Section */}
-                            <form
+                            {/* <form
                                 onSubmit={(e) => sendMessageHandle(e, suggestedUser._id)}
                                 className="flex items-center space-x-2 md:space-x-4 border border-zinc-800 bg-transparent rounded-full px-4 py-2"
+                            > */}
+                            <form
+                                onSubmit={(e) => sendMessageHandle(e, suggestedUser._id)}
+                                className="flex items-center space-x-2 md:space-x-4 border border-slate-700 bg-[#1e293b] rounded-full px-4 py-2"
                             >
                                 <div className="relative">
                                     <Smile
@@ -626,15 +634,23 @@ function ChatBox() {
                                     className="hidden"
                                     id="fileInput"
                                 />
-                                <label htmlFor="fileInput">
+                                {/* <label htmlFor="fileInput">
                                     <Camera className="h-6 w-6 text-black dark:text-white cursor-pointer" />
-                                </label>
-                                {isresOk ?
-
+                                </label> */}
+                                {/* {isresOk ?
                                     <Button variant="outline" type="submit" className="text-sm font-semibold text-blue-400 hover:text-blue-400 hover:bg-white border-none dark:hover:bg-neutral-950 dark:hover:text-blue-400 p-0">
                                         Send
                                     </Button> :
                                     <Button disabled variant="outline" type="submit" className="text-sm font-semibold text-blue-400 hover:text-blue-400 hover:bg-white border-none dark:hover:bg-neutral-950 dark:hover:text-blue-400 p-0">
+                                        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                                        Send
+                                    </Button>
+                                } */}
+                                {isresOk ?
+                                    <Button variant="ghost" type="submit" className="text-sm font-semibold text-blue-400  hover:bg-transparent dark:hover:bg-transparent hover:text-white">
+                                        Send
+                                    </Button> :
+                                    <Button disabled variant="ghost" type="submit" className="text-sm font-semibold text-blue-400 ">
                                         <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                                         Send
                                     </Button>
@@ -644,9 +660,10 @@ function ChatBox() {
                     </div>
                 </div >)
                 : (
-                    <div className="flex-grow hidden md:flex flex-col justify-center items-center bg-white dark:bg-neutral-950 dark:text-white">
+                    // <div className="flex-grow hidden md:flex flex-col justify-center items-center bg-white dark:bg-neutral-950 dark:text-white">
+                    <div className="flex-grow hidden md:flex flex-col justify-center items-center bg-[#0f172a] text-white">
                         <div className="emptyField flex flex-col justify-center items-center">
-                            <div>
+                            <div className=''>
                                 <AiOutlineMessage size={100} />
                             </div>
                             <div className="flex flex-col justify-center items-center my-2">
