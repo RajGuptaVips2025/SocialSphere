@@ -268,7 +268,7 @@ function Navbar({ compact = false }) {
             <nav
                 className={`fixed top-0 left-0 right-0 z-30 flex items-center justify-between px-4 py-2 border-b border-slate-700 bg-[#1e293b] text-white`}
             >
-                <Link to="/" className="flex items-center gap-2">
+                <Link to="/" className="flex items-center gap-2 ">
                     <IoEarthSharp className="text-purple-500 w-8 h-8" />
                     <span className=" text-lg text-white-400">SocialSphere</span>
                 </Link>
@@ -278,7 +278,7 @@ function Navbar({ compact = false }) {
                         <div key={link.id} className="relative">
                             {link.label === 'Search' ? (
                                 <>
-                                    <Button variant="ghost" onClick={link.onClick} className="flex items-center gap-2">
+                                    <Button variant="ghost" onClick={link.onClick} className="flex items-center gap-2 hover:bg-slate-700 dark:hover:bg-slate-700">
                                         <span className="w-6 h-6">{link.icon}</span>
                                         {!compact && <span className="hidden lg:inline">{link.label}</span>}
                                     </Button>
@@ -317,7 +317,7 @@ function Navbar({ compact = false }) {
                                                                 key={user._id}
                                                                 onClick={() => setIsSearchOpen(false)}
                                                                 // className="flex items-center gap-3 py-3 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-                                                                className="flex items-center gap-3 py-3 px-2 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg transition-colors"
+                                                                className="flex items-center gap-3 py-3 px-2 hover:bg-slate-700 dark:hover:bg-slate-700 rounded-lg transition-colors"
                                                             >
                                                                 <Avatar className="w-12 h-12">
                                                                     <AvatarImage src={user.profilePicture} alt={user.username} />
@@ -343,7 +343,7 @@ function Navbar({ compact = false }) {
                                 <>
                                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                         <DialogTrigger asChild>
-                                            <Button variant="ghost" className="flex items-center gap-2">
+                                            <Button variant="ghost" className="flex items-center gap-2 hover:bg-slate-700 dark:hover:bg-slate-700">
                                                 <span className="w-6 h-6">{link.icon}</span>
                                                 {!compact && <span className="hidden lg:inline">{link.label}</span>}
                                             </Button>
@@ -561,7 +561,7 @@ function Navbar({ compact = false }) {
                                     </Dialog>
                                 </>
                             ) : (
-                                <Button variant="ghost" asChild className="flex items-center gap-2">
+                                <Button variant="ghost" asChild className="flex items-center gap-2 hover:bg-slate-700 dark:hover:bg-slate-700">
                                     <Link to={link.link}>
                                         <span className="w-6 h-6">{link.icon}</span>
                                         {!compact && <span className="hidden lg:inline">{link.label}</span>}
@@ -576,7 +576,7 @@ function Navbar({ compact = false }) {
                 <div className="md:hidden">
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="hover:bg-slate-700 dark:hover:bg-slate-700">
                                 <Menu className="w-6 h-6" />
                             </Button>
                         </SheetTrigger>
@@ -588,7 +588,7 @@ function Navbar({ compact = false }) {
                                         {link.label === 'Search' ? (
                                             <Button
                                                 variant="ghost"
-                                                className="flex items-center gap-3 justify-start"
+                                                className="flex items-center gap-3 justify-start hover:bg-slate-700 dark:hover:bg-slate-700"
                                                 onClick={() => {
                                                     setIsSearchOpenMobile(true);
                                                 }}
@@ -599,7 +599,7 @@ function Navbar({ compact = false }) {
                                         ) : link.label === 'Create' ? (
                                             <Button
                                                 variant="ghost"
-                                                className="flex items-center gap-3 justify-start"
+                                                className="flex items-center gap-3 justify-start hover:bg-slate-700 dark:hover:bg-slate-700"
                                                 onClick={() => {
                                                     setIsOpen(true); // Open your Dialog
                                                 }}
@@ -608,7 +608,7 @@ function Navbar({ compact = false }) {
                                                 <span>{link.label}</span>
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" className="flex items-center gap-3 justify-start" asChild>
+                                            <Button variant="ghost" className="flex items-center gap-3 justify-start hover:bg-slate-700 dark:hover:bg-slate-700" asChild>
                                                 <Link to={link.link}>
                                                     <span className="w-6 h-6">{link.icon}</span>
                                                     <span>{link.label}</span>

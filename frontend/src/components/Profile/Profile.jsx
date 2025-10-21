@@ -171,10 +171,10 @@ const Profile = () => {
 
   return (
 
-    <div className="flex flex-col min-h-screen bg-white dark:text-white dark:bg-neutral-950">
+    <div className="flex flex-col min-h-screen text-white dark:text-white bg-[#0f172a] dark:bg-[#0f172a]">
       <PostComment selectedMedia={selectedMedia} isDialogOpen={isDialogOpen} setIsDialogOpen={setIsDialogOpen} />
       {isLoading && <InstagramProfileSkeletonComponent />}
-      <main className="profile flex flex-col items-center justify-start flex-grow px-4 sm:px-8 lg:px-[72px] pt-[80px] pb-10 dark:bg-neutral-950 dark:text-white min-h-screen">
+      <main className="profile flex flex-col items-center justify-start flex-grow px-4 sm:px-8 lg:px-[72px] pt-[80px] pb-10  min-h-screen">
         <div className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center">
           <div className="w-full mx-auto">
             <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-6 mb-10 w-full text-center sm:text-left">
@@ -222,7 +222,7 @@ const Profile = () => {
 
             {/* Post Tabs */}
             <section className="mt-10 w-full h-auto">
-              <Tabs defaultValue="posts" className="w-full h-full">
+              <Tabs defaultValue="posts" className="w-full h-full ">
                 <TabsList className="w-full justify-center">
                   <TabsTrigger value="posts" className="flex-1 text-sm"><GridIcon className="w-4 h-4 mr-2" />Posts</TabsTrigger>
                 </TabsList>
