@@ -48,7 +48,6 @@ lerna-debug.log*
 *.bmp
 *.tiff
 *.ico
-*.svg
 *.webp
 *.mp4
 *.mov
