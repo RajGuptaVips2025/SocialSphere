@@ -10,7 +10,6 @@ import Login from './components/Auth/Login';
 import Home from './components/Home/Home';
 import Explore from './components/Explore/Explore';
 import ReelSection from './components/Explore/ReelSection';
-// import { ProfileEdit } from './components/Profile/profile-edit';
 import { ChatComponent } from './components/Chat/ChatComponent';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
