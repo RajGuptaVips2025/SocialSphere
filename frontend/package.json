@@ -7,8 +7,8 @@
     "node": "20.x"
   },
   "scripts": {
-    "prebuild": "chmod +x ./node_modules/.bin/vite",
-    "build": "vite build",
+    "prebuild": "chmod +x ./node_modules/.bin/vite || true",
+    "build": "npm run prebuild && vite build",
     "dev": "vite",
     "start": "vite preview",
     "lint": "eslint ."
@@ -57,7 +57,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
-    "vite": "^7.2.1"
+    "vite": "^5.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
