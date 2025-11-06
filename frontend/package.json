@@ -7,10 +7,10 @@
     "node": "20.x"
   },
   "scripts": {
-    "prebuild": "chmod +x ./node_modules/.bin/vite",
-    "build": "vite build",
-    "dev": "vite",
-    "start": "vite preview",
+    "prebuild": "chmod +x ./node_modules/.bin/vite || true",
+    "build": "npm run prebuild && npx vite build",
+    "dev": "npx vite",
+    "start": "npx vite preview",
     "lint": "eslint ."
   },
   "dependencies": {
