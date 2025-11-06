@@ -3,12 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
-    "prebuild": "chmod +x ./node_modules/.bin/vite",
     "build": "vite build",
     "dev": "vite",
     "start": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "postinstall": "vite --version"
   },
   "dependencies": {
     "@mirus/tiptap-editor": "^3.0.3",
