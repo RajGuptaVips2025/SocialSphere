@@ -10,8 +10,7 @@
     "build": "vite build",
     "dev": "vite",
     "start": "vite preview",
-    "lint": "eslint .",
-    "postinstall": "vite --version"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@mirus/tiptap-editor": "^3.0.3",
