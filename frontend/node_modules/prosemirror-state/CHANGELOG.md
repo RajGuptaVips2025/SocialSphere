@@ -1,3 +1,11 @@
+## 1.4.4 (2025-10-23)
+
+### Bug fixes
+
+Avoid a problematic TypeScript compilation issue of `Selection.visible` in some configurations.
+
+Fix an issue in `insertText` where it would always clear non-empty selections, even when not near the inserted text.
+
 ## 1.4.3 (2023-05-17)
 
 ### Bug fixes
