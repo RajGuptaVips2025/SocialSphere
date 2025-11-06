@@ -7,9 +7,9 @@
     "node": "20.x"
   },
   "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "start": "vite preview",
+    "build": "npx vite build",
+    "dev": "npx vite",
+    "start": "npx vite preview",
     "lint": "eslint ."
   },
   "dependencies": {
