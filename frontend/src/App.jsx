@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import GuestRoute from './components/ProtectedRoute/GuestRoute';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Navbar from './components/Home/Navbar';
+//sdasfasd
 
 // Lazy-loaded components
 const Profile = lazy(() => import('./components/Profile/Profile'));
